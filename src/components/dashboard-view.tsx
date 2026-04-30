@@ -314,6 +314,7 @@ export function DashboardView() {
     () => ({
       active: filteredProjects.filter((project) => project.status === "active"),
       overdue: filteredProjects.filter((project) => project.status === "overdue"),
+      late: filteredProjects.filter((project) => project.status === "late"),
       completed: filteredProjects.filter((project) => project.status === "completed")
     }),
     [filteredProjects]
@@ -404,13 +405,13 @@ export function DashboardView() {
         <ProjectSkeletons />
       ) : filteredProjects.length ? (
         <div className="section-stack">
-          {(["overdue", "active", "completed"] as ProjectStatus[]).map((status) =>
+          {(["overdue", "late", "active", "completed"] as (keyof typeof grouped)[]).map((status) =>
             grouped[status].length ? (
               <section key={status}>
                 <div className="section-heading">
-                  <h2>{projectStatusLabel(status)}</h2>
+                  <h2>{projectStatusLabel(status as ProjectStatus)}</h2>
                   <span className="status-pill">
-                    {status === "active" ? <Flame size={14} /> : <Calendar size={14} />}
+                    {status === "active" ? <Flame size={14} /> : status === "overdue" || status === "late" ? <TriangleAlert size={14} /> : <Calendar size={14} />}
                     {grouped[status].length}
                   </span>
                 </div>
