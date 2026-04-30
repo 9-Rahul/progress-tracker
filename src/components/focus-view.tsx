@@ -22,7 +22,7 @@ export function FocusView() {
     return dueToday.length ? dueToday : selectedProject.tasks.filter((task) => !task.done).slice(0, 3);
   }, [selectedProject]);
 
-  const nextDue = selectedProject ? getNextDueAt(selectedProject.logs) : null;
+  const nextDue = selectedProject ? getNextDueAt(selectedProject) : null;
   const reminderSoon = nextDue ? nextDue.getTime() - Date.now() < 2 * 60 * 60 * 1000 && !canSubmitToday(selectedProject.logs) : false;
 
   return (
