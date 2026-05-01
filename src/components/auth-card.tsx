@@ -59,10 +59,10 @@ export function AuthCard() {
   return (
     <main className="auth-screen">
       <section className="auth-hero">
-        <p className="eyebrow">Pathways</p>
-        <h1>Track your journey to the next big role.</h1>
+        <p className="eyebrow">ExecTrack</p>
+        <h1>Track execution, not intention.</h1>
         <p>
-          A simple, scalable progress tracker for students, learners, and job seekers. Stay consistent and show your progress to clients or hiring managers.
+          Stay consistent, track your execution accurately, and let the results speak for themselves.
         </p>
 
         <div className="auth-showcase" aria-hidden>
