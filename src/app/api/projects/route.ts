@@ -2,22 +2,19 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { Project } from "@/lib/types";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id");
+    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     const db = await getDatabase();
     const projects = await db.collection("projects")
-      .aggregate([
-        { $match: { ownerId } },
-        { $sort: { updatedAt: -1 } },
-        { $group: { _id: "$id", doc: { $first: "$$ROOT" } } },
-        { $replaceRoot: { newRoot: "$doc" } },
-        { $sort: { createdAt: -1 } }
-      ])
+      .find({ ownerId })
+      .sort({ createdAt: -1 })
       .toArray();
 
     return NextResponse.json(projects);
@@ -29,7 +26,7 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id");
+    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -58,7 +55,7 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id");
+    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }

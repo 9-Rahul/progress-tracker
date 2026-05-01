@@ -282,7 +282,7 @@ function CreateProjectModal({
 export function DashboardView() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { projects, loading, stats, createProject } = useProjectStore();
+  const { projects, loading, error, stats, createProject } = useProjectStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("recent");
   const [modalOpen, setModalOpen] = useState(false);
@@ -337,6 +337,13 @@ export function DashboardView() {
           </button>
         </div>
       </header>
+
+      {error && (
+        <div className="alert danger" style={{ margin: "16px 0 24px" }}>
+          <TriangleAlert size={18} />
+          <span>{error}</span>
+        </div>
+      )}
 
       {/* Stats — first card spans 2 cols to create visual hierarchy */}
       <motion.section 
