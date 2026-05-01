@@ -1,9 +1,4 @@
 import { MongoClient, ServerApiVersion } from "mongodb";
-import tls from "tls";
-
-if (typeof tls !== "undefined" && "DEFAULT_MIN_VERSION" in tls) {
-  tls.DEFAULT_MIN_VERSION = "TLSv1.2";
-}
 
 declare global {
   // eslint-disable-next-line no-var
@@ -20,7 +15,12 @@ function createClient() {
 
   return new MongoClient(uri, {
     connectTimeoutMS: 10000,
-    socketTimeoutMS: 45000
+    socketTimeoutMS: 45000,
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true
+    }
   });
 }
 
