@@ -5,6 +5,8 @@ import { dateKey } from "@/lib/progress";
 import type { DailyStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 
 const dayMs = 24 * 60 * 60 * 1000;
 
