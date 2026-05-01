@@ -188,16 +188,30 @@ export function useProjectStore() {
             ? Math.round((tasks.filter((task) => task.done).length / tasks.length) * 100)
             : project.progress;
 
-          return {
+          const updated = {
             ...project,
             tasks,
             progress: Math.max(project.progress, taskProgress),
             updatedAt: now
           };
+
+          fetchWithUser("/api/projects", ownerId, {
+            method: "PUT",
+            body: JSON.stringify({
+              id: projectId,
+              updates: {
+                tasks: updated.tasks,
+                progress: updated.progress,
+                updatedAt: updated.updatedAt
+              }
+            })
+          });
+
+          return updated;
         })
       );
     },
-    [saveProjects]
+    [ownerId, saveProjects]
   );
 
   const addTaskToProject = useCallback(
@@ -216,15 +230,28 @@ export function useProjectStore() {
             done: false
           };
 
-          return {
+          const updated = {
             ...project,
             tasks: [...project.tasks, newTask],
             updatedAt: now
           };
+
+          fetchWithUser("/api/projects", ownerId, {
+            method: "PUT",
+            body: JSON.stringify({
+              id: projectId,
+              updates: {
+                tasks: updated.tasks,
+                updatedAt: updated.updatedAt
+              }
+            })
+          });
+
+          return updated;
         })
       );
     },
-    [saveProjects]
+    [ownerId, saveProjects]
   );
 
   const removeTaskFromProject = useCallback(
@@ -236,15 +263,28 @@ export function useProjectStore() {
             return project;
           }
 
-          return {
+          const updated = {
             ...project,
             tasks: project.tasks.filter((task) => task.id !== taskId),
             updatedAt: now
           };
+
+          fetchWithUser("/api/projects", ownerId, {
+            method: "PUT",
+            body: JSON.stringify({
+              id: projectId,
+              updates: {
+                tasks: updated.tasks,
+                updatedAt: updated.updatedAt
+              }
+            })
+          });
+
+          return updated;
         })
       );
     },
-    [saveProjects]
+    [ownerId, saveProjects]
   );
 
   const stats = useMemo(() => {
