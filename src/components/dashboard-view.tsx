@@ -45,7 +45,6 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.4 }}
-      whileHover={{ y: -4, transition: { duration: 0.2 } }}
     >
       <Link className="project-card" href={`/projects/${project.id}`}>
         <div>
@@ -69,9 +68,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
 
         <div className="project-footer">
           <div className="deadline">
-            <span>Deadline</span>
-            <strong>{project.deadline.startsWith("2099") ? "No deadline" : formatDate(project.deadline)}</strong>
-            <span>{missed ? `${missed} Gaps Detected` : `Resilience: ${streakCount(project.logs)}d`}</span>
+            <span>{project.deadline.startsWith("2099") ? "No deadline" : formatDate(project.deadline)}</span>
+            <span>{missed ? `${missed} missed` : `${streakCount(project.logs)}d streak`}</span>
           </div>
           <ProgressRing value={project.progress} />
         </div>
@@ -156,7 +154,7 @@ function CreateProjectModal({
         <div className="modal-header">
           <div>
             <p className="eyebrow">New track</p>
-            <h2 className="modal-title">Define your next milestone</h2>
+            <h2 className="modal-title">Define track details</h2>
           </div>
           <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
             <X size={17} />
@@ -220,9 +218,9 @@ function CreateProjectModal({
               type="checkbox" 
               checked={!hasDeadline} 
               onChange={(e) => setHasDeadline(!e.target.checked)} 
-              style={{ width: 18, height: 18 }}
+              style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
             />
-            <span style={{ fontWeight: 600 }}>This track has no specific deadline</span>
+            <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>This track has no specific deadline</span>
           </label>
 
           {hasDeadline && (
@@ -233,7 +231,7 @@ function CreateProjectModal({
           )}
 
           <div className="section-divider" />
-          <p className="eyebrow">Strategic Milestones</p>
+          <p className="eyebrow">Milestones</p>
           
           <div className="section-stack" style={{ gap: 8 }}>
             {tasks.map((task, i) => (
@@ -248,16 +246,16 @@ function CreateProjectModal({
               </div>
             ))}
             
-            <div className="field-group" style={{ gridTemplateColumns: "1fr 120px auto", alignItems: "flex-end", gap: 8 }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
               <label className="field">
-                <span>Objective title</span>
+                <span>Milestone name</span>
                 <input className="input" placeholder="e.g., Complete research phase" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
               </label>
               <label className="field">
-                <span>Due</span>
+                <span>Due date</span>
                 <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
               </label>
-              <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 12px" }}>
+              <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
                 <Plus size={16} />
               </button>
             </div>
@@ -283,6 +281,7 @@ function CreateProjectModal({
 
 export function DashboardView() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { projects, loading, stats, createProject } = useProjectStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("recent");
@@ -291,8 +290,9 @@ export function DashboardView() {
   useEffect(() => {
     if (searchParams.get("new")) {
       setModalOpen(true);
+      router.replace("/dashboard", { scroll: false });
     }
-  }, [searchParams]);
+  }, [searchParams, router]);
 
   const filteredProjects = useMemo(() => {
     const nextProjects = projects
@@ -324,54 +324,56 @@ export function DashboardView() {
     <div className="page">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Strategic Overview</p>
-          <h1 className="page-title">Career Intelligence Dashboard</h1>
+          <p className="eyebrow">Overview</p>
+          <h1 className="page-title">Progress Tracker</h1>
           <p className="page-subtitle">
-            Map your trajectory, track skill acquisition, and optimize your professional growth.
+            All your active tracks, deadlines, and streaks in one place.
           </p>
         </div>
         <div className="toolbar">
           <button className="primary-button" type="button" onClick={() => setModalOpen(true)}>
             <Plus size={16} strokeWidth={2.5} />
-            Initialize Track
+            New Track
           </button>
         </div>
       </header>
 
+      {/* Stats — first card spans 2 cols to create visual hierarchy */}
       <motion.section 
         className="stats-grid" 
         aria-label="Workspace stats"
+        style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
       >
-        <article className="metric-card">
+        <article className="metric-card featured" style={{ gridColumn: "span 2", background: "var(--surface-hover)" }}>
           <p className="metric-label">
-            Active Tracks <Activity size={14} strokeWidth={2.5} />
+            Active <Activity size={14} strokeWidth={2} />
           </p>
           <p className="metric-value">{stats.active}</p>
-          <p className="metric-note">Goals in propulsion</p>
+          <p className="metric-note">tracks in progress</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Aggregate velocity <BarChart3 size={14} strokeWidth={2.5} />
+            Avg progress <BarChart3 size={14} strokeWidth={2} />
           </p>
           <p className="metric-value">{stats.average}%</p>
-          <p className="metric-note">Across all active roadmaps</p>
+          <p className="metric-note">across active tracks</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Milestones Reached <CheckCircle2 size={14} strokeWidth={2.5} />
+            Completed <CheckCircle2 size={14} strokeWidth={2} />
           </p>
           <p className="metric-value">{stats.completed}</p>
-          <p className="metric-note">Successfully archived wins</p>
+          <p className="metric-note">tracks finished</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Attention Required <TriangleAlert size={14} strokeWidth={2.5} />
+            Overdue <TriangleAlert size={14} strokeWidth={2} />
           </p>
-          <p className="metric-value">{stats.overdue}</p>
-          <p className="metric-note">Tracks exceeding timeline</p>
+          <p className="metric-value" style={stats.overdue > 0 ? { color: "var(--red)" } : {}}>{stats.overdue}</p>
+          <p className="metric-note">need attention</p>
         </article>
       </motion.section>
 
@@ -425,7 +427,10 @@ export function DashboardView() {
           )}
         </div>
       ) : (
-        <div className="empty-state">No projects match this view.</div>
+        <div className="empty-state">
+          <FolderKanban strokeWidth={1.5} />
+          <span>No projects match this view.</span>
+        </div>
       )}
 
       {modalOpen ? <CreateProjectModal onClose={() => setModalOpen(false)} onCreate={createProject} /> : null}

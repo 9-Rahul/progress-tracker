@@ -9,7 +9,9 @@ import { useProjectStore } from "@/hooks/use-project-store";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard }
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/focus", label: "Focus", icon: Focus },
+  { href: "/reports", label: "Reports", icon: BarChart3 }
 ];
 
 function isActive(pathname: string, href: string) {
@@ -106,7 +108,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button className="secondary-button" type="button" onClick={toggleTheme} title={theme === "dark" ? "Light mode" : "Dark mode"}>
               {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <button className="secondary-button" type="button" onClick={handleReset} title="Reset all data">
+            <button className="secondary-button danger" type="button" onClick={handleReset} title="Reset all data">
               <RotateCcw size={17} />
               Reset
             </button>
