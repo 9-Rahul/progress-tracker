@@ -83,7 +83,7 @@ function CreateProjectModal({
   onCreate
 }: {
   onClose: () => void;
-  onCreate: (input: ProjectInput) => Project;
+  onCreate: (input: ProjectInput) => any;
 }) {
   const router = useRouter();
   const [title, setTitle] = useState("");
@@ -107,12 +107,12 @@ function CreateProjectModal({
     setTasks(tasks.filter((_, i) => i !== index));
   };
 
-  const submit = (event: FormEvent<HTMLFormElement>) => {
+  const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setError("");
 
     try {
-      const project = onCreate({
+      const project = await onCreate({
         title,
         description,
         tags: tags

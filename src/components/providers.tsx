@@ -34,6 +34,7 @@ type AuthContextValue = {
   signInWithEmail: (email: string, password: string) => Promise<void>;
   signUpWithEmail: (name: string, email: string, password: string) => Promise<void>;
   signOutUser: () => Promise<void>;
+  signInDemo: () => Promise<void>;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -168,6 +169,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
         if (firebaseAuth) {
           await signOut(firebaseAuth);
         }
+      },
+      signInDemo: async () => {
+        await setDemoSession();
       }
     }),
     [loading, user]
@@ -176,10 +180,14 @@ function AuthProvider({ children }: { children: ReactNode }) {
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
+import { ProjectProvider } from "@/components/project-context";
+
 export function Providers({ children }: { children: ReactNode }) {
   return (
     <ThemeProvider>
-      <AuthProvider>{children}</AuthProvider>
+      <AuthProvider>
+        <ProjectProvider>{children}</ProjectProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

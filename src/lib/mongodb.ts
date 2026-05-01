@@ -2,7 +2,7 @@ import { MongoClient, ServerApiVersion } from "mongodb";
 
 declare global {
   // eslint-disable-next-line no-var
-  var paceMongoClientPromise: Promise<MongoClient> | undefined;
+  var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
 const uri = process.env.MONGODB_URI;
@@ -14,19 +14,23 @@ function createClient() {
   }
 
   return new MongoClient(uri, {
-    serverApi: {
-      version: ServerApiVersion.v1,
-      strict: true,
-      deprecationErrors: true
-    }
+    connectTimeoutMS: 10000,
+    socketTimeoutMS: 45000,
   });
 }
 
-export async function getDatabase() {
-  if (!global.paceMongoClientPromise) {
-    global.paceMongoClientPromise = createClient().connect();
-  }
+let clientPromise: Promise<MongoClient>;
 
-  const client = await global.paceMongoClientPromise;
+if (process.env.NODE_ENV === "development") {
+  if (!global._mongoClientPromise) {
+    global._mongoClientPromise = createClient().connect();
+  }
+  clientPromise = global._mongoClientPromise;
+} else {
+  clientPromise = createClient().connect();
+}
+
+export async function getDatabase() {
+  const client = await clientPromise;
   return client.db(dbName);
 }
