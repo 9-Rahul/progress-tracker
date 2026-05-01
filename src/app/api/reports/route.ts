@@ -4,6 +4,7 @@ import { reportSummary } from "@/lib/progress";
 import type { Project } from "@/lib/types";
 
 export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {

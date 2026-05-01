@@ -342,7 +342,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
               </div>
             </div>
             <div className="timeline-list">
-              {project.tasks.map((task) => (
+              {(project.tasks || []).map((task) => (
                 <div 
                   className={`timeline-row ${task.done ? 'muted' : ''}`} 
                   key={task.id}
