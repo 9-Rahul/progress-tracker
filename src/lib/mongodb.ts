@@ -20,10 +20,7 @@ function createClient() {
 
   return new MongoClient(uri, {
     connectTimeoutMS: 10000,
-    socketTimeoutMS: 45000,
-    tls: true,
-    ssl: true,
-    tlsInsecure: true
+    socketTimeoutMS: 45000
   });
 }
 
