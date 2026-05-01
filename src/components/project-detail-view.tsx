@@ -184,7 +184,7 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
 }
 
 export function ProjectDetailView({ projectId }: { projectId: string }) {
-  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject, addTaskToProject } = useProjectStore();
+  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject } = useProjectStore();
   const project = projects.find((item) => item.id === projectId);
   const [selectedLog, setSelectedLog] = useState<DailyLog | null>(null);
   
@@ -347,13 +347,29 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                   className={`timeline-row ${task.done ? 'muted' : ''}`} 
                   key={task.id}
                   onClick={() => toggleTask(project.id, task.id)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 >
                   <span style={{ textDecoration: task.done ? 'line-through' : 'none' }}>
                     <strong>{task.title}</strong>
                     <span>Due: {formatDate(task.due)}</span>
                   </span>
-                  {task.done ? <CheckCircle2 size={17} color="var(--green)" /> : <CircleDot size={17} />}
+                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                    {task.done ? <CheckCircle2 size={17} color="var(--green)" /> : <CircleDot size={17} />}
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (window.confirm("Are you sure you want to delete this milestone?")) {
+                          removeTaskFromProject(project.id, task.id);
+                        }
+                      }}
+                      className="ghost-button"
+                      style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}
+                      title="Delete milestone"
+                    >
+                      <X size={14} />
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
