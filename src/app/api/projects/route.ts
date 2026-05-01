@@ -34,7 +34,11 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const project = await request.json();
+    const text = await request.text();
+    if (!text) {
+      return NextResponse.json({ error: "Missing request body" }, { status: 400 });
+    }
+    const project = JSON.parse(text);
     const db = await getDatabase();
     
     // Security: Ensure ownerId matches the authenticated user
@@ -59,7 +63,11 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { id, updates } = await request.json();
+    const text = await request.text();
+    if (!text) {
+      return NextResponse.json({ error: "Missing request body" }, { status: 400 });
+    }
+    const { id, updates } = JSON.parse(text);
     const db = await getDatabase();
 
     await db.collection("projects").updateOne(
