@@ -23,9 +23,7 @@ function createClient() {
     socketTimeoutMS: 45000,
     tls: true,
     ssl: true,
-    tlsInsecure: true,
-    tlsAllowInvalidCertificates: true,
-    tlsAllowInvalidHostnames: true
+    tlsInsecure: true
   });
 }
 
