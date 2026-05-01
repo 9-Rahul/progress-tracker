@@ -19,8 +19,8 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Pathways — Career Intelligence",
-  description: "Track your trajectory, skill acquisition, and professional growth."
+  title: "ExecTrack — Track execution, not intention.",
+  description: "A fast, functional progress tracker for people who live in code."
 };
 
 export default function RootLayout({ children }: { children: ReactNode }) {
