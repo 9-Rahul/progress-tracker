@@ -10,6 +10,7 @@ import type { DailyStatus, Project, ProjectInput } from "@/lib/types";
 type ProjectContextValue = {
   projects: Project[];
   loading: boolean;
+  error: string | null;
   stats: { active: number; completed: number; overdue: number; average: number };
   createProject: (input: ProjectInput) => Promise<Project>;
   submitDailyLog: (projectId: string, status: DailyStatus, notes?: string) => Promise<boolean>;
@@ -44,6 +45,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
   const ownerId = user?.id ?? "demo-user";
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (authLoading) {
@@ -52,13 +54,17 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     }
     async function load() {
       try {
+        setError(null);
         const response = await fetchWithUser("/api/projects", ownerId);
-        if (!response.ok) throw new Error("Fetch failed");
+        if (!response.ok) {
+          const errData = await response.json().catch(() => ({}));
+          throw new Error(errData.error || errData.message || "Failed to load projects.");
+        }
         const data = await response.json();
 
         const uniqueData = Array.from(new Map(data.map((p: any) => [p.id, p])).values());
 
-        if (uniqueData.length === 0 && ownerId === "demo-user") {
+        if (uniqueData.length === 0) {
           const demo = createDemoProjects(ownerId);
           setProjects(demo);
           for (const p of demo) {
@@ -70,11 +76,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         } else {
           setProjects(uniqueData.map((p: any) => ({
             ...p,
+            tasks: p.tasks || [],
             status: normalizeProjectStatus(p)
           })));
         }
-      } catch (err) {
+      } catch (err: any) {
         console.error("Load Error:", err);
+        setError(err.message || "Unable to load data.");
       } finally {
         setLoading(false);
       }
@@ -399,6 +407,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     () => ({
       projects,
       loading,
+      error,
       stats,
       createProject,
       submitDailyLog,
@@ -409,7 +418,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       addTaskToProject,
       removeTaskFromProject
     }),
-    [projects, loading, stats, createProject, submitDailyLog, toggleTask, resetData, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject]
+    [projects, loading, error, stats, createProject, submitDailyLog, toggleTask, resetData, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject]
   );
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
