@@ -18,7 +18,9 @@ import {
   MessageSquareText,
   RotateCcw,
   TimerReset,
-  TriangleAlert
+  TriangleAlert,
+  X,
+  Plus
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
@@ -35,7 +37,7 @@ import {
   streakCount,
   weeklySeries
 } from "@/lib/progress";
-import type { DailyStatus, Project } from "@/lib/types";
+import type { DailyLog, DailyStatus, Project } from "@/lib/types";
 import { BarChart, LineChart } from "@/components/ui/charts";
 import { ProgressRing } from "@/components/ui/progress-ring";
 
@@ -50,41 +52,41 @@ function ProjectReport({ project, summary }: { project: Project; summary: any })
   const daysTaken = daysBetween(new Date(project.createdAt), new Date());
   
   return (
-    <section className="glass-panel" style={{ border: "2px solid var(--accent)", background: "var(--accent-soft)", marginBottom: 32 }}>
+    <section className="glass-panel" style={{ border: "1px solid var(--border)", borderLeft: "4px solid var(--green)", marginBottom: 32 }}>
       <div className="panel-header">
         <div>
-          <p className="eyebrow">Final Intelligence Audit</p>
-          <h2 className="panel-title" style={{ fontSize: 24 }}>Trajectory Analysis Complete</h2>
+          <p className="eyebrow">Summary</p>
+          <h2 className="panel-title" style={{ fontSize: 24 }}>Track Complete</h2>
         </div>
         <ProgressRing value={100} size={80} stroke={8} />
       </div>
       
       <div className="stats-grid" style={{ marginTop: 24, gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <div className="metric-card" style={{ background: "transparent", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-          <p className="metric-label">Persistence</p>
+        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
+          <p className="metric-label">Completion rate</p>
           <p className="metric-value">{summary.completionRate}%</p>
-          <p className="metric-note">Overall commitment score</p>
+          <p className="metric-note">of all logged days</p>
         </div>
-        <div className="metric-card" style={{ background: "transparent", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-          <p className="metric-label">Execution Time</p>
+        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
+          <p className="metric-label">Time taken</p>
           <p className="metric-value">{daysTaken}d</p>
-          <p className="metric-note">Total lifespan of track</p>
+          <p className="metric-note">days from start to finish</p>
         </div>
-        <div className="metric-card" style={{ background: "transparent", border: "1px solid rgba(99, 102, 241, 0.2)" }}>
-          <p className="metric-label">Integrity</p>
-          <p className="metric-value">{gaps} Gaps</p>
-          <p className="metric-note">Audited timeline omissions</p>
+        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
+          <p className="metric-label">Gaps</p>
+          <p className="metric-value">{gaps} missed</p>
+          <p className="metric-note">days without logs</p>
         </div>
       </div>
       
-      <div style={{ marginTop: 24, padding: "20px", background: "rgba(15, 23, 42, 0.6)", borderRadius: 6, border: "1px solid rgba(99, 102, 241, 0.3)" }}>
-        <p style={{ margin: 0, fontWeight: 700, color: "var(--accent-light)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Strategist Conclusion: 
+      <div style={{ marginTop: 24, padding: "20px", background: "var(--surface-hover)", borderRadius: 6, border: "1px solid var(--border)" }}>
+        <p style={{ margin: 0, fontWeight: 700, color: "var(--text-secondary)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
+          Summary: 
         </p>
-        <p style={{ margin: "12px 0 0", color: "#ffffff", fontSize: 15, lineHeight: 1.6, fontWeight: 450 }}>
+        <p style={{ margin: "12px 0 0", color: "var(--text-primary)", fontSize: 15, lineHeight: 1.6, fontWeight: 450 }}>
           {summary.completionRate > 80 
-            ? "Exceptional execution. This track has been optimized and archived with high-fidelity data. You have demonstrated consistent proficiency acquisition."
-            : "Project archived. While objectives were met, the timeline shows significant volatility. Future tracks should focus on cadence stability."}
+            ? "Great job. This track is now complete and all goals have been met."
+            : "Track complete. You hit your goals, but try to keep a steadier pace next time."}
         </p>
       </div>
     </section>
@@ -182,8 +184,20 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
 }
 
 export function ProjectDetailView({ projectId }: { projectId: string }) {
-  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject } = useProjectStore();
+  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject, addTaskToProject } = useProjectStore();
   const project = projects.find((item) => item.id === projectId);
+  const [selectedLog, setSelectedLog] = useState<DailyLog | null>(null);
+  
+  const [newTaskTitle, setNewTaskTitle] = useState("");
+  const [newTaskDue, setNewTaskDue] = useState("");
+
+  const handleAddTask = () => {
+    if (newTaskTitle.trim()) {
+      addTaskToProject(projectId, newTaskTitle.trim(), newTaskDue || (project ? project.deadline : ""));
+      setNewTaskTitle("");
+      setNewTaskDue("");
+    }
+  };
 
   const summary = useMemo(() => (project ? reportSummary(project) : null), [project]);
   const missed = useMemo(() => (project ? missedDays(project).slice(-7) : []), [project]);
@@ -224,10 +238,10 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         <div>
           <Link className="ghost-button" href="/dashboard" style={{ padding: 0, minHeight: "auto", marginBottom: 12 }}>
             <ArrowLeft size={16} strokeWidth={2.5} />
-            Return to Intelligence
+            Back to Overview
           </Link>
           <p className="eyebrow">
-            Track Analysis
+            Track Details
           </p>
           <h1 className="page-title">{project.title}</h1>
           <p className="page-subtitle">{project.description}</p>
@@ -240,10 +254,10 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
               }
             }} title="Mark as complete">
               <CheckCircle2 size={16} strokeWidth={2.5} />
-              Finalize Track
+              Complete Track
             </button>
           )}
-          <button className="secondary-button" type="button" onClick={handleReset} title="Reset this track">
+          <button className="secondary-button danger" type="button" onClick={handleReset} title="Reset this track">
             <RotateCcw size={16} strokeWidth={2.5} />
             Reset Analytics
           </button>
@@ -279,24 +293,24 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
       >
         <article className="metric-card">
           <p className="metric-label">
-            Acquisition <Focus size={14} strokeWidth={2.5} />
+            Target <Focus size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{project.progress}%</p>
-          <p className="metric-note">Target proficiency level</p>
+          <p className="metric-note">completion target</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Consistency <Activity size={14} strokeWidth={2.5} />
+            Streak <Activity size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{streakCount(project.logs)}</p>
-          <p className="metric-note">Active streak (days)</p>
+          <p className="metric-note">days in a row</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Velocity <BarChart3 size={14} strokeWidth={2.5} />
+            Last 7 days <BarChart3 size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{summary.completionRate}%</p>
-          <p className="metric-note">Past seven days</p>
+          <p className="metric-note">completion rate</p>
         </article>
       </motion.section>
 
@@ -305,8 +319,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Milestone Progress</p>
-                <h2 className="panel-title">{project.progress >= 100 ? "Track Finalized" : "Update your status"}</h2>
+                <p className="eyebrow">Progress</p>
+                <h2 className="panel-title">{project.progress >= 100 ? "Track complete" : "Log your day"}</h2>
               </div>
               <ProgressRing value={project.progress} size={96} stroke={9} />
             </div>
@@ -315,7 +329,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             ) : (
               <div className="alert success" style={{ marginTop: 20 }}>
                 <Check size={18} />
-                Analytics collection complete. This track has been finalized.
+                This track is complete. No further logs needed.
               </div>
             )}
           </section>
@@ -323,8 +337,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Strategic Milestones</p>
-                <h2 className="panel-title">Track objectives</h2>
+                <p className="eyebrow">Tasks</p>
+                <h2 className="panel-title">Project milestones</h2>
               </div>
             </div>
             <div className="timeline-list">
@@ -343,13 +357,27 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 </div>
               ))}
             </div>
+            
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12, marginTop: 16 }}>
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>New milestone</span>
+                <input className="input" placeholder="e.g. Design DB schema" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddTask())} />
+              </label>
+              <label className="field" style={{ margin: 0 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Due date</span>
+                <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
+              </label>
+              <button type="button" className="secondary-button" onClick={handleAddTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
+                <Plus size={16} />
+              </button>
+            </div>
           </section>
 
           <section className="glass-panel">
             <div className="panel-header">
               <div>
                 <p className="eyebrow">Cadence</p>
-                <h2 className="panel-title">Missed log guard</h2>
+                <h2 className="panel-title">Missed days</h2>
               </div>
             </div>
             {missed.length ? (
@@ -358,7 +386,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                   <div className="timeline-row" key={day}>
                     <span>
                       <strong>{formatDate(day)}</strong>
-                      <span>No daily submission was recorded.</span>
+                      <span>No log for this day.</span>
                     </span>
                     <span className="status-pill overdue">
                       <span className="status-dot" />
@@ -370,7 +398,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             ) : (
               <div className="alert success">
                 <CheckCircle2 size={18} />
-                No missed daily logs are currently flagged.
+                No missed days. Keep it up.
               </div>
             )}
           </section>
@@ -378,8 +406,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Recent notes</p>
-                <h2 className="panel-title">Progress log</h2>
+                <p className="eyebrow">Notes</p>
+                <h2 className="panel-title">Recent logs</h2>
               </div>
             </div>
             <div className="timeline-list">
@@ -388,13 +416,13 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 .sort((a, b) => b.date.localeCompare(a.date))
                 .slice(0, 5)
                 .map((log) => (
-                  <div className="timeline-row" key={log.id}>
+                  <button className="timeline-row" key={log.id} onClick={() => setSelectedLog(log)}>
                     <span>
                       <strong>{dailyStatusLabel(log.status)}</strong>
                       <span>{log.notes || `Logged on ${formatDate(log.date)}`}</span>
                     </span>
                     <MessageSquareText size={17} />
-                  </div>
+                  </button>
                 ))}
             </div>
           </section>
@@ -404,8 +432,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Performance</p>
-                <h2 className="panel-title">Daily trend</h2>
+                <p className="eyebrow">Trend</p>
+                <h2 className="panel-title">Daily progress</h2>
               </div>
             </div>
             <LineChart data={weeklySeries(project)} />
@@ -414,8 +442,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Weekly mix</p>
-                <h2 className="panel-title">Completed vs missed</h2>
+                <p className="eyebrow">Breakdown</p>
+                <h2 className="panel-title">By status</h2>
               </div>
             </div>
             <BarChart
@@ -428,6 +456,66 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           </section>
         </div>
       </div>
+
+      <AnimatePresence>
+        {selectedLog && (
+          <motion.div
+            className="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setSelectedLog(null)}
+          >
+            <motion.div
+              className="modal-panel"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            >
+              <div className="modal-header">
+                <div>
+                  <p className="eyebrow">Log Details</p>
+                  <h2 className="modal-title">{formatDate(selectedLog.date)}</h2>
+                </div>
+                <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={() => setSelectedLog(null)}>
+                  <X size={17} />
+                </button>
+              </div>
+
+              <div style={{ padding: "8px 0" }}>
+                <div className="field">
+                  <span>Status</span>
+                  <div>
+                    <span className="status-pill">
+                      {dailyStatusLabel(selectedLog.status)}
+                    </span>
+                  </div>
+                </div>
+                
+                <div className="field" style={{ marginTop: 20 }}>
+                  <span>Notes</span>
+                  {selectedLog.notes ? (
+                    <p style={{ marginTop: 4, whiteSpace: "pre-wrap", color: "var(--text-primary)", background: "var(--surface-hover)", padding: 12, borderRadius: 6, border: "1px solid var(--border)", lineHeight: 1.6 }}>
+                      {selectedLog.notes}
+                    </p>
+                  ) : (
+                    <p style={{ marginTop: 4, color: "var(--text-tertiary)", fontStyle: "italic" }}>
+                      No additional notes provided for this day.
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <div className="toolbar" style={{ marginTop: 24, justifyContent: "flex-end", borderTop: "1px solid var(--border)", paddingTop: 16 }}>
+                <button className="secondary-button" type="button" onClick={() => setSelectedLog(null)}>
+                  Close
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

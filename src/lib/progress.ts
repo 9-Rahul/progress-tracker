@@ -46,24 +46,24 @@ export function formatTimeRemaining(target: Date) {
 export function dailyStatusLabel(status: DailyStatus) {
   switch (status) {
     case "completed":
-      return "Milestone Achieved";
+      return "Done";
     case "not_completed":
-      return "Objective Pending";
+      return "Not done";
     case "working":
-      return "Active Progression";
+      return "In progress";
   }
 }
 
 export function projectStatusLabel(status: ProjectStatus) {
   switch (status) {
     case "completed":
-      return "Archived Success";
+      return "Completed";
     case "overdue":
-      return "Timeline Breach";
+      return "Overdue";
     case "active":
-      return "Operational";
+      return "Active";
     case "late":
-      return "Audit Required";
+      return "Late";
   }
 }
 
@@ -71,7 +71,7 @@ export function normalizeProjectStatus(project: Project): ProjectStatus {
   if (project.progress >= 100) {
     return "completed";
   }
-  
+
   const deadline = new Date(`${project.deadline}T23:59:59`);
   if (deadline.getTime() < Date.now()) {
     return "overdue";
@@ -143,15 +143,15 @@ export function weeklySeries(project: Project): WeeklySeriesItem[] {
     const day = addDays(today, index - 6);
     const key = dateKey(day);
     const log = logsByDate.get(key);
-    
+
     // Only count as 'missed' if the day is >= createdAt and no log exists
     const isBeforeCreation = key < createdAtKey;
-    const status: DailyStatus | "missed" | "na" = log?.status 
-      ? log.status 
-      : isBeforeCreation 
-        ? "na" 
+    const status: DailyStatus | "missed" | "na" = log?.status
+      ? log.status
+      : isBeforeCreation
+        ? "na"
         : "missed";
-        
+
     const score = log?.status === "completed" ? 100 : log?.status === "working" ? 58 : log ? 18 : 0;
 
     return {

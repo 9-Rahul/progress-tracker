@@ -52,7 +52,7 @@ export function FocusView() {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Today&apos;s project</p>
+                <p className="eyebrow">Track</p>
                 <h2 className="panel-title">{selectedProject.title}</h2>
                 <p className="page-subtitle" style={{ marginTop: 8 }}>
                   Due {formatDate(selectedProject.deadline)} with a {streakCount(selectedProject.logs)} day streak.
@@ -86,7 +86,7 @@ export function FocusView() {
           <aside className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Task lane</p>
+                <p className="eyebrow">Tasks</p>
                 <h2 className="panel-title">Today&apos;s tasks</h2>
               </div>
               <span className="status-pill">{todaysTasks.length}</span>
@@ -120,7 +120,10 @@ export function FocusView() {
           </aside>
         </div>
       ) : (
-        <div className="empty-state">No active projects are ready for focus mode.</div>
+        <div className="empty-state">
+          <Focus strokeWidth={1.5} />
+          <span>No active projects are ready for focus mode.</span>
+        </div>
       )}
     </div>
   );

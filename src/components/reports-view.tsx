@@ -18,14 +18,14 @@ export function ReportsView() {
     <div className="page">
       <header className="topbar">
         <div>
-          <p className="eyebrow">Analytics</p>
-          <h1 className="page-title">Progress Summaries</h1>
-          <p className="page-subtitle">Review your learning pace, missed milestones, and consistency.</p>
+          <p className="eyebrow">Reports</p>
+          <h1 className="page-title">Progress Reports</h1>
+          <p className="page-subtitle">View past performance across tracks.</p>
         </div>
         <div className="toolbar">
           <button className="secondary-button" type="button" onClick={() => window.print()}>
             <Printer size={17} />
-            Print preview
+            Print
           </button>
           <button className="primary-button" type="button" onClick={() => window.print()}>
             <Download size={17} />
@@ -81,7 +81,7 @@ export function ReportsView() {
                 <div className="panel-header">
                   <div>
                     <p className="eyebrow">Daily performance</p>
-                    <h2 className="panel-title">Line trend</h2>
+                    <h2 className="panel-title">Trend</h2>
                   </div>
                 </div>
                 <LineChart data={weeklySeries(selectedProject)} />
@@ -89,8 +89,8 @@ export function ReportsView() {
               <div>
                 <div className="panel-header">
                   <div>
-                    <p className="eyebrow">Distribution</p>
-                    <h2 className="panel-title">Bar summary</h2>
+                    <p className="eyebrow">Breakdown</p>
+                    <h2 className="panel-title">Totals</h2>
                   </div>
                 </div>
                 <BarChart
@@ -107,8 +107,8 @@ export function ReportsView() {
           <aside className="report-preview">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">PDF preview</p>
-                <h2 className="panel-title">Weekly snapshot</h2>
+                <p className="eyebrow">Preview</p>
+                <h2 className="panel-title">Document</h2>
               </div>
               <FileText size={22} />
             </div>
@@ -143,7 +143,10 @@ export function ReportsView() {
           </aside>
         </div>
       ) : (
-        <div className="empty-state">Create a project to generate weekly reports.</div>
+        <div className="empty-state">
+          <FileText strokeWidth={1.5} />
+          <span>Create a project to generate weekly reports.</span>
+        </div>
       )}
     </div>
   );
