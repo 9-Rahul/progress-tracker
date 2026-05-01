@@ -11,7 +11,7 @@ type Mode = "login" | "signup";
 export function AuthCard() {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
-  const { user, loading, firebaseReady, signInWithGoogle, signInWithEmail, signUpWithEmail } = useAuth();
+  const { user, loading, firebaseReady, signInWithGoogle, signInWithEmail, signUpWithEmail, signInDemo } = useAuth();
   const [mode, setMode] = useState<Mode>("login");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -112,6 +112,27 @@ export function AuthCard() {
           Continue with Google
         </button>
 
+        <button
+          className="secondary-button"
+          type="button"
+          style={{ width: "100%", marginTop: "12px", background: "#22c55e", color: "white", borderColor: "#15803d" }}
+          onClick={async () => {
+            setError("");
+            setPending(true);
+            try {
+              await signInDemo();
+              router.push("/dashboard");
+            } catch (err) {
+              setError("Demo session failed.");
+            } finally {
+              setPending(false);
+            }
+          }}
+          disabled={pending}
+        >
+          Try Demo Mode (Bypass Login)
+        </button>
+
         <div className="auth-divider">or use email</div>
 
         <form className="auth-form" onSubmit={submit}>
@@ -155,7 +176,30 @@ export function AuthCard() {
             </span>
           </label>
 
-          {error ? <div className="alert danger">{error}</div> : null}
+          {error ? (
+            <div className="alert danger" style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+              <span>{error}</span>
+              <button
+                type="button"
+                className="secondary-button"
+                style={{ alignSelf: "flex-start", fontSize: 12, padding: "4px 8px", minHeight: "auto", background: "var(--surface-popover)", border: "1px solid var(--border)" }}
+                onClick={async () => {
+                  setError("");
+                  setPending(true);
+                  try {
+                    await signInDemo();
+                    router.push("/dashboard");
+                  } catch (err) {
+                    setError("Demo session failed.");
+                  } finally {
+                    setPending(false);
+                  }
+                }}
+              >
+                Use Demo Mode
+              </button>
+            </div>
+          ) : null}
           {!firebaseReady ? (
             <div className="alert warning">
               <ShieldCheck size={18} />
