@@ -200,6 +200,33 @@ export function useProjectStore() {
     [saveProjects]
   );
 
+  const addTaskToProject = useCallback(
+    (projectId: string, title: string, due: string) => {
+      const now = new Date().toISOString();
+      saveProjects((current) =>
+        current.map((project) => {
+          if (project.id !== projectId) {
+            return project;
+          }
+
+          const newTask = {
+            id: `task-${Date.now()}`,
+            title,
+            due,
+            done: false
+          };
+
+          return {
+            ...project,
+            tasks: [...project.tasks, newTask],
+            updatedAt: now
+          };
+        })
+      );
+    },
+    [saveProjects]
+  );
+
   const stats = useMemo(() => {
     const active = projects.filter((project) => project.status === "active").length;
     const completed = projects.filter((project) => project.status === "completed").length;
@@ -306,6 +333,7 @@ export function useProjectStore() {
     toggleTask,
     resetData,
     resetProject,
-    finalizeProject
+    finalizeProject,
+    addTaskToProject
   };
 }
