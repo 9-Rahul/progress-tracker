@@ -132,149 +132,149 @@ function CreateProjectModal({
 
   return (
     <AnimatePresence>
-      <motion.div 
-        className="modal-backdrop" 
-        role="presentation" 
+      <motion.div
+        className="modal-backdrop"
+        role="presentation"
         onMouseDown={onClose}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <motion.section 
-          className="modal-panel" 
-          role="dialog" 
-          aria-modal="true" 
-          aria-label="Create project" 
+        <motion.section
+          className="modal-panel"
+          role="dialog"
+          aria-modal="true"
+          aria-label="Create project"
           onMouseDown={(event) => event.stopPropagation()}
           initial={{ scale: 0.95, opacity: 0, y: 20 }}
           animate={{ scale: 1, opacity: 1, y: 0 }}
           exit={{ scale: 0.95, opacity: 0, y: 20 }}
           transition={{ type: "spring", damping: 25, stiffness: 300 }}
         >
-        <div className="modal-header">
-          <div>
-            <p className="eyebrow">New track</p>
-            <h2 className="modal-title">Define track details</h2>
+          <div className="modal-header">
+            <div>
+              <p className="eyebrow">New track</p>
+              <h2 className="modal-title">Define track details</h2>
+            </div>
+            <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
+              <X size={17} />
+            </button>
           </div>
-          <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
-            <X size={17} />
-          </button>
-        </div>
 
-        <form className="progress-form" onSubmit={submit}>
-          <label className="field">
-            <span>Title</span>
-            <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="Weekly report launch" />
-          </label>
-
-          <label className="field">
-            <span>Description</span>
-            <textarea
-              className="textarea"
-              value={description}
-              onChange={(event) => setDescription(event.target.value)}
-              required
-              placeholder="What outcome are you tracking?"
-            />
-          </label>
-
-          <div className="field-grid">
+          <form className="progress-form" onSubmit={submit}>
             <label className="field">
-              <span>Tags</span>
-              <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Backend" />
+              <span>Title</span>
+              <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="Weekly report launch" />
             </label>
 
             <label className="field">
-              <span>Priority</span>
-              <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
-                <option value="low">Low</option>
-                <option value="medium">Medium</option>
-                <option value="high">High</option>
+              <span>Description</span>
+              <textarea
+                className="textarea"
+                value={description}
+                onChange={(event) => setDescription(event.target.value)}
+                required
+                placeholder="What outcome are you tracking?"
+              />
+            </label>
+
+            <div className="field-grid">
+              <label className="field">
+                <span>Tags</span>
+                <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Backend" />
+              </label>
+
+              <label className="field">
+                <span>Priority</span>
+                <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
+                  <option value="low">Low</option>
+                  <option value="medium">Medium</option>
+                  <option value="high">High</option>
+                </select>
+              </label>
+            </div>
+
+            <div className="field">
+              <span>Task Duration</span>
+              <select
+                className="select"
+                onChange={(e) => {
+                  const days = parseInt(e.target.value);
+                  if (days > 0) {
+                    setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
+                    setHasDeadline(true);
+                  }
+                }}
+              >
+                <option value="0">Custom or Long-term</option>
+                {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
+                  <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
+                ))}
               </select>
+            </div>
+
+            <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
+              <input
+                type="checkbox"
+                checked={!hasDeadline}
+                onChange={(e) => setHasDeadline(!e.target.checked)}
+                style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
+              />
+              <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>This track has no specific deadline</span>
             </label>
-          </div>
 
-          <div className="field">
-            <span>Task Duration</span>
-            <select 
-              className="select" 
-              onChange={(e) => {
-                const days = parseInt(e.target.value);
-                if (days > 0) {
-                  setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
-                  setHasDeadline(true);
-                }
-              }}
-            >
-              <option value="0">Custom or Long-term</option>
-              {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
-                <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
-              ))}
-            </select>
-          </div>
+            {hasDeadline && (
+              <label className="field">
+                <span>Select specific deadline</span>
+                <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
+              </label>
+            )}
 
-          <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
-            <input 
-              type="checkbox" 
-              checked={!hasDeadline} 
-              onChange={(e) => setHasDeadline(!e.target.checked)} 
-              style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
-            />
-            <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>This track has no specific deadline</span>
-          </label>
+            <div className="section-divider" />
+            <p className="eyebrow">Milestones</p>
 
-          {hasDeadline && (
-            <label className="field">
-              <span>Select specific deadline</span>
-              <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
-            </label>
-          )}
-
-          <div className="section-divider" />
-          <p className="eyebrow">Milestones</p>
-          
-          <div className="section-stack" style={{ gap: 8 }}>
-            {tasks.map((task, i) => (
-              <div key={i} className="task-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--app-bg)", borderRadius: 4, border: "1px solid var(--border)" }}>
-                <div style={{ display: "flex", flexDirection: "column" }}>
-                  <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
-                  <span className="muted" style={{ fontSize: 11 }}>Due: {formatDate(task.due)}</span>
+            <div className="section-stack" style={{ gap: 8 }}>
+              {tasks.map((task, i) => (
+                <div key={i} className="task-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--app-bg)", borderRadius: 4, border: "1px solid var(--border)" }}>
+                  <div style={{ display: "flex", flexDirection: "column" }}>
+                    <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
+                    <span className="muted" style={{ fontSize: 11 }}>Due: {formatDate(task.due)}</span>
+                  </div>
+                  <button type="button" onClick={() => removeTask(i)} className="ghost-button" style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}>
+                    <X size={14} />
+                  </button>
                 </div>
-                <button type="button" onClick={() => removeTask(i)} className="ghost-button" style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}>
-                  <X size={14} />
+              ))}
+
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
+                <label className="field">
+                  <span>Milestone name</span>
+                  <input className="input" placeholder="e.g., Complete research phase" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
+                </label>
+                <label className="field">
+                  <span>Due date</span>
+                  <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
+                </label>
+                <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
+                  <Plus size={16} />
                 </button>
               </div>
-            ))}
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
-              <label className="field">
-                <span>Milestone name</span>
-                <input className="input" placeholder="e.g., Complete research phase" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
-              </label>
-              <label className="field">
-                <span>Due date</span>
-                <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
-              </label>
-              <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
-                <Plus size={16} />
+            </div>
+
+            {error ? <div className="alert danger">{error}</div> : null}
+
+            <div className="toolbar">
+              <button className="secondary-button" type="button" onClick={onClose}>
+                Cancel
+              </button>
+              <button className="primary-button" type="submit">
+                <Plus size={17} />
+                Start Track
               </button>
             </div>
-          </div>
-
-          {error ? <div className="alert danger">{error}</div> : null}
-
-          <div className="toolbar">
-            <button className="secondary-button" type="button" onClick={onClose}>
-              Cancel
-            </button>
-            <button className="primary-button" type="submit">
-              <Plus size={17} />
-              Start Track
-            </button>
-          </div>
-        </form>
-      </motion.section>
-    </motion.div>
+          </form>
+        </motion.section>
+      </motion.div>
     </AnimatePresence>
   );
 }
@@ -346,8 +346,8 @@ export function DashboardView() {
       )}
 
       {/* Stats — first card spans 2 cols to create visual hierarchy */}
-      <motion.section 
-        className="stats-grid" 
+      <motion.section
+        className="stats-grid"
         aria-label="Workspace stats"
         style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
         initial={{ opacity: 0, y: 10 }}
