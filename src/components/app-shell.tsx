@@ -50,8 +50,8 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Compass size={20} strokeWidth={2.5} />
           </span>
           <span>
-            <p className="brand-title" style={{ fontSize: 16, letterSpacing: "-0.02em", fontWeight: 800 }}>Pathways</p>
-            <p className="brand-caption" style={{ fontSize: 11, fontWeight: 500, opacity: 0.7 }}>Career Intelligence</p>
+            <p className="brand-title" style={{ fontSize: 16, letterSpacing: "-0.02em", fontWeight: 800 }}>ExecTrack</p>
+            <p className="brand-caption" style={{ fontSize: 11, fontWeight: 500, opacity: 0.7 }}>Track execution, not intention.</p>
           </span>
         </Link>
 
