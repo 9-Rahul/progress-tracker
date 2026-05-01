@@ -287,26 +287,6 @@ export function useProjectStore() {
     [ownerId, saveProjects]
   );
 
-  const removeTaskFromProject = useCallback(
-    (projectId: string, taskId: string) => {
-      const now = new Date().toISOString();
-      saveProjects((current) =>
-        current.map((project) => {
-          if (project.id !== projectId) {
-            return project;
-          }
-
-          return {
-            ...project,
-            tasks: project.tasks.filter((task) => task.id !== taskId),
-            updatedAt: now
-          };
-        })
-      );
-    },
-    [saveProjects]
-  );
-
   const stats = useMemo(() => {
     const active = projects.filter((project) => project.status === "active").length;
     const completed = projects.filter((project) => project.status === "completed").length;
