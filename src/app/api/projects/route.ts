@@ -20,7 +20,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json(projects);
   } catch (error) {
     console.error("Database Error:", error);
-    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+    const message = error instanceof Error ? error.message : "Internal Server Error";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }
 
