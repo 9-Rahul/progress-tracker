@@ -68,15 +68,20 @@ export function projectStatusLabel(status: ProjectStatus) {
 }
 
 export function normalizeProjectStatus(project: Project): ProjectStatus {
+  // Check deadline first — an overdue project is overdue even if progress hit 100
+  const deadline = new Date(`${project.deadline}T23:59:59`);
+  if (!project.deadline.startsWith("2099") && deadline.getTime() < Date.now()) {
+    // If explicitly finalized (progress===100), still mark completed
+    if (project.progress >= 100) return "completed";
+    return "overdue";
+  }
+
+  // Explicitly finalized
   if (project.progress >= 100) {
     return "completed";
   }
 
-  const deadline = new Date(`${project.deadline}T23:59:59`);
-  if (deadline.getTime() < Date.now()) {
-    return "overdue";
-  }
-
+  // Check cadence — missed the 24-hour update window
   const nextDue = getNextDueAt(project);
   if (nextDue && nextDue.getTime() < Date.now()) {
     return "late";

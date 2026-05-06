@@ -58,7 +58,7 @@ function ProjectReport({ project, summary }: { project: Project; summary: any })
           <p className="eyebrow">Summary</p>
           <h2 className="panel-title" style={{ fontSize: 24 }}>Track Complete</h2>
         </div>
-        <ProgressRing value={100} size={80} stroke={8} />
+        <ProgressRing value={project.progress} size={80} stroke={8} />
       </div>
       
       <div className="stats-grid" style={{ marginTop: 24, gridTemplateColumns: "repeat(3, 1fr)" }}>
