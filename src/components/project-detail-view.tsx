@@ -5,11 +5,14 @@ import { FormEvent, useEffect, useMemo, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Activity,
+  AlertCircle,
   ArrowLeft,
   BarChart3,
   CalendarClock,
+  CalendarDays,
   Check,
   CheckCircle2,
+  ChevronRight,
   CircleDot,
   Clock,
   Clock3,
@@ -17,7 +20,9 @@ import {
   Focus,
   MessageSquareText,
   RotateCcw,
+  Star,
   TimerReset,
+  TrendingUp,
   TriangleAlert,
   X,
   Plus
@@ -42,52 +47,121 @@ import { BarChart, LineChart } from "@/components/ui/charts";
 import { ProgressRing } from "@/components/ui/progress-ring";
 
 const statusOptions: { value: DailyStatus; title: string; detail: string; icon: LucideIcon }[] = [
-  { value: "completed", title: "Completed", detail: "Today moved exactly as planned.", icon: CheckCircle2 },
-  { value: "working", title: "Working on it", detail: "Momentum exists, but it is still in progress.", icon: CircleDot },
-  { value: "not_completed", title: "Not completed", detail: "Mark the miss and keep the chain honest.", icon: TriangleAlert }
+  { value: "completed", title: "Done for today", detail: "Everything went as planned. Great work!", icon: CheckCircle2 },
+  { value: "working", title: "Still working on it", detail: "Good progress! I'll wrap it up soon.", icon: CircleDot },
+  { value: "not_completed", title: "Didn't get to it", detail: "That's okay — logging it keeps your streak honest.", icon: TriangleAlert }
 ];
+
+// Small wavy SVG line decoration for metric cards
+function WavyLine({ color }: { color: string }) {
+  return (
+    <svg width="80" height="28" viewBox="0 0 80 28" fill="none" style={{ flexShrink: 0 }}>
+      <path
+        d="M4 20 C14 8, 24 24, 34 16 C44 8, 54 22, 66 14 C70 12, 74 12, 76 14"
+        stroke={color} strokeWidth="2" strokeLinecap="round" fill="none"
+      />
+      <circle cx="76" cy="14" r="3" fill={color} />
+    </svg>
+  );
+}
 
 function ProjectReport({ project, summary }: { project: Project; summary: any }) {
   const gaps = missedDays(project).length;
   const daysTaken = daysBetween(new Date(project.createdAt), new Date());
-  
+  const isGreat = summary.completionRate > 80;
+
   return (
-    <section className="glass-panel" style={{ border: "1px solid var(--border)", borderLeft: "4px solid var(--green)", marginBottom: 32 }}>
-      <div className="panel-header">
-        <div>
-          <p className="eyebrow">Summary</p>
-          <h2 className="panel-title" style={{ fontSize: 24 }}>Track Complete</h2>
+    <section className="pr-card">
+      {/* ── Header ── */}
+      <div className="pr-header">
+        <div className="pr-header-left">
+          <div className="pr-eyebrow-row">
+            <CheckCircle2 size={14} color="var(--green)" strokeWidth={2.5} />
+            <span className="pr-eyebrow">SUMMARY</span>
+          </div>
+          <h2 className="pr-title">Track Complete</h2>
+          <p className="pr-subtitle">
+            {isGreat ? "Great job! You've completed this track." : "Track complete. Review your pace below."}
+          </p>
         </div>
-        <ProgressRing value={project.progress} size={80} stroke={8} />
+        <div className="pr-ring">
+          <svg width="96" height="96" viewBox="0 0 96 96">
+            <defs>
+              <filter id="pr-glow">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+              </filter>
+            </defs>
+            <circle cx="48" cy="48" r="42" fill="none" stroke="var(--green)" strokeWidth="3" opacity="0.2" />
+            <circle cx="48" cy="48" r="42" fill="none" stroke="var(--green)" strokeWidth="3"
+              strokeDasharray="263.9" strokeDashoffset={263.9 * (1 - project.progress / 100)}
+              strokeLinecap="round" transform="rotate(-90 48 48)" filter="url(#pr-glow)" />
+          </svg>
+          <div className="pr-ring-text">
+            <span className="pr-ring-value">{project.progress}</span>
+            <span className="pr-ring-label">PCT</span>
+          </div>
+        </div>
       </div>
-      
-      <div className="stats-grid" style={{ marginTop: 24, gridTemplateColumns: "repeat(3, 1fr)" }}>
-        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
-          <p className="metric-label">Completion rate</p>
-          <p className="metric-value">{summary.completionRate}%</p>
-          <p className="metric-note">of all logged days</p>
+
+      {/* ── Metric cards ── */}
+      <div className="pr-metrics">
+        <div className="pr-metric-card">
+          <div className="pr-metric-icon green"><TrendingUp size={18} /></div>
+          <p className="pr-metric-label">Days I checked in</p>
+          <div className="pr-metric-value-row">
+            <span className="pr-metric-value">{summary.completionRate}%</span>
+            <WavyLine color="#238636" />
+          </div>
+          <p className="pr-metric-note">out of all days tracked</p>
         </div>
-        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
-          <p className="metric-label">Time taken</p>
-          <p className="metric-value">{daysTaken}d</p>
-          <p className="metric-note">days from start to finish</p>
+
+        <div className="pr-metric-card">
+          <div className="pr-metric-icon blue"><CalendarDays size={18} /></div>
+          <p className="pr-metric-label">Time spent</p>
+          <div className="pr-metric-value-row">
+            <span className="pr-metric-value">{daysTaken}d</span>
+            <WavyLine color="#2f81f7" />
+          </div>
+          <p className="pr-metric-note">days from start to finish</p>
         </div>
-        <div className="metric-card" style={{ background: "var(--surface-hover)" }}>
-          <p className="metric-label">Gaps</p>
-          <p className="metric-value">{gaps} missed</p>
-          <p className="metric-note">days without logs</p>
+
+        <div className="pr-metric-card">
+          <div className="pr-metric-icon amber"><AlertCircle size={18} /></div>
+          <p className="pr-metric-label">Days skipped</p>
+          <div className="pr-metric-value-row">
+            <span className="pr-metric-value">{gaps}</span>
+            <WavyLine color="#d29922" />
+          </div>
+          <p className="pr-metric-note">days with no activity logged</p>
         </div>
       </div>
-      
-      <div style={{ marginTop: 24, padding: "20px", background: "var(--surface-hover)", borderRadius: 6, border: "1px solid var(--border)" }}>
-        <p style={{ margin: 0, fontWeight: 700, color: "var(--text-secondary)", fontSize: 12, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-          Summary: 
-        </p>
-        <p style={{ margin: "12px 0 0", color: "var(--text-primary)", fontSize: 15, lineHeight: 1.6, fontWeight: 450 }}>
-          {summary.completionRate > 80 
-            ? "Great job. This track is now complete and all goals have been met."
-            : "Track complete. You hit your goals, but try to keep a steadier pace next time."}
-        </p>
+
+      {/* ── Summary row ── */}
+      <div className="pr-summary-row">
+        <div className="pr-summary-left">
+          <div className="pr-metric-icon green" style={{ flexShrink: 0 }}><Star size={18} /></div>
+          <div>
+            <p className="pr-summary-label">SUMMARY:</p>
+            <p className="pr-summary-text">
+              {isGreat
+                ? "Amazing work! You stayed consistent and crossed the finish line."
+                : "You finished! Next time, try to check in more regularly for better momentum."}
+            </p>
+          </div>
+        </div>
+        {/* Mountain illustration */}
+        <svg width="90" height="64" viewBox="0 0 90 64" fill="none" style={{ flexShrink: 0, opacity: 0.7 }}>
+          <polygon points="45,4 80,60 10,60" fill="rgba(35,134,54,0.15)" stroke="rgba(35,134,54,0.5)" strokeWidth="1.5" strokeLinejoin="round" />
+          <polygon points="22,32 48,60 0,60" fill="rgba(35,134,54,0.1)" stroke="rgba(35,134,54,0.3)" strokeWidth="1" strokeLinejoin="round" />
+          {/* Flag */}
+          <line x1="45" y1="4" x2="45" y2="-4" stroke="var(--green)" strokeWidth="1.5" />
+          <polygon points="45,2 56,7 45,12" fill="var(--green)" />
+          {/* Sparkle dots */}
+          <circle cx="62" cy="18" r="1.5" fill="var(--green)" opacity="0.6" />
+          <circle cx="72" cy="10" r="1" fill="var(--green)" opacity="0.4" />
+          <circle cx="78" cy="22" r="1.5" fill="var(--green)" opacity="0.5" />
+        </svg>
       </div>
     </section>
   );
@@ -101,6 +175,7 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
   const [message, setMessage] = useState("");
   const nextDue = getNextDueAt(project);
   const canSubmit = true;
+  const isLate = nextDue.getTime() <= now;
 
   useEffect(() => {
     const timer = window.setInterval(() => setNow(Date.now()), 1000);
@@ -110,7 +185,6 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
   const submit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMessage("");
-
     try {
       onSubmit(selected, `Topics: ${topics}\nLearned: ${learned}`);
       setTopics("");
@@ -121,63 +195,85 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
     }
   };
 
+  const statusMeta: Record<DailyStatus, { border: string; iconColor: string }> = {
+    completed: { border: "var(--green)", iconColor: "var(--green)" },
+    working:   { border: "var(--accent)", iconColor: "var(--accent)" },
+    not_completed: { border: "var(--red)", iconColor: "var(--amber)" },
+  };
+
   return (
-    <form className="progress-form" onSubmit={submit}>
-      <div className="status-options">
+    <form className="pdv-form" onSubmit={submit}>
+      {/* Status options */}
+      <div className="pdv-status-list">
         {statusOptions.map((option) => {
           const Icon = option.icon;
+          const isActive = selected === option.value;
+          const meta = statusMeta[option.value];
           return (
             <button
-              className={`status-option ${selected === option.value ? "active" : ""}`}
+              className={`pdv-status-row${isActive ? " pdv-status-active" : ""}`}
               key={option.value}
               type="button"
               onClick={() => setSelected(option.value)}
+              style={isActive ? { borderLeftColor: meta.border } : {}}
             >
-              <Icon size={19} />
-              <strong>{option.title}</strong>
-              <span>{option.detail}</span>
+              <span className="pdv-status-icon" style={{ color: isActive ? meta.iconColor : undefined }}>
+                <Icon size={20} />
+              </span>
+              <span className="pdv-status-text">
+                <strong>{option.title}</strong>
+                <span>{option.detail}</span>
+              </span>
+              <ChevronRight size={16} className="pdv-status-chevron" />
             </button>
           );
         })}
       </div>
 
-      <label className="field">
-        <span>What topics did you cover today?</span>
+      {/* Text inputs */}
+      <label className="pdv-field">
+        <span>What did you work on today?</span>
         <textarea
-          className="textarea"
+          className="pdv-textarea"
           value={topics}
-          onChange={(event) => setTopics(event.target.value)}
-          placeholder="e.g. React Hooks, Node.js Middleware"
+          onChange={(e) => setTopics(e.target.value)}
+          placeholder="e.g. Finished the login page, reviewed pull requests"
           required
         />
       </label>
 
-      <label className="field">
-        <span>What new things did you learn?</span>
+      <label className="pdv-field">
+        <span>What did you learn or discover?</span>
         <textarea
-          className="textarea"
+          className="pdv-textarea"
           value={learned}
-          onChange={(event) => setLearned(event.target.value)}
-          placeholder="e.g. How to use useMemo for optimization"
+          onChange={(e) => setLearned(e.target.value)}
+          placeholder="e.g. Learned how to optimize images with Next.js"
           required
         />
       </label>
 
-      <div className="countdown" aria-live="polite">
-        <span className="muted">{nextDue.getTime() > now ? "Audit Window Closes in" : "Audit Window EXPIRED"}</span>
-        <span className={`countdown-time ${nextDue.getTime() <= now ? "overdue" : ""}`}>
-          {nextDue.getTime() > now ? formatTimeRemaining(nextDue) : "LATE"}
-        </span>
-        <span className="muted">
-          {nextDue ? `Target timestamp: ${formatDate(nextDue, { hour: "numeric", minute: "2-digit" })}` : "No analytics recorded yet."}
-        </span>
+      {/* Audit countdown */}
+      <div className="pdv-audit-box">
+        <div className="pdv-audit-icon">
+          <Clock3 size={20} />
+        </div>
+        <div className="pdv-audit-content">
+          <span className="pdv-audit-label">{isLate ? "Daily check-in window closed" : "Time left to check in"}</span>
+          <span className={`pdv-audit-time${isLate ? " pdv-audit-late" : ""}`}>
+            {isLate ? "MISSED" : formatTimeRemaining(nextDue)}
+          </span>
+          <span className="pdv-audit-target">
+            {nextDue ? `Window closes at ${formatDate(nextDue, { hour: "numeric", minute: "2-digit" })}` : ""}
+          </span>
+        </div>
       </div>
 
       {message ? <div className={`alert ${message.startsWith("Progress") ? "success" : "warning"}`}>{message}</div> : null}
 
-      <button className="primary-button" type="submit" disabled={!canSubmit}>
+      <button className="pdv-submit-btn" type="submit" disabled={!canSubmit}>
         <TimerReset size={17} />
-        Submit daily progress
+        Save today&apos;s progress
       </button>
     </form>
   );
@@ -234,40 +330,50 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <div>
-          <Link className="ghost-button" href="/dashboard" style={{ padding: 0, minHeight: "auto", marginBottom: 12 }}>
+      <header className="premium-topbar">
+        <div className="premium-topbar-left">
+          <Link className="premium-topbar-back" href="/dashboard" aria-label="Back to dashboard">
             <ArrowLeft size={16} strokeWidth={2.5} />
-            Back to Overview
           </Link>
-          <p className="eyebrow">
-            Track Details
-          </p>
-          <h1 className="page-title">{project.title}</h1>
-          <p className="page-subtitle">{project.description}</p>
+          <div className="premium-topbar-divider" />
+          <div className="premium-topbar-title-block">
+            <span className="premium-topbar-eyebrow">YOU ARE HERE</span>
+            <div className="premium-topbar-title-row">
+              <span className="premium-topbar-dot" />
+              <span className="premium-topbar-title">{project.title}</span>
+            </div>
+          </div>
         </div>
-        <div className="toolbar">
+
+        <div className="premium-topbar-right">
           {project.progress < 100 && (
-            <button className="primary-button" type="button" onClick={() => {
-              if (window.confirm("Archive this track? This will set progress to 100% and generate the final audit report.")) {
+            <button className="premium-topbar-action-btn premium-topbar-complete" type="button" onClick={() => {
+              if (window.confirm("Mark this track as complete? This will set progress to 100% and lock it.")) {
                 finalizeProject(project.id);
               }
-            }} title="Mark as complete">
-              <CheckCircle2 size={16} strokeWidth={2.5} />
-              Complete Track
+            }}>
+              <CheckCircle2 size={15} strokeWidth={2.5} />
+              Mark Complete
             </button>
           )}
-          <button className="secondary-button danger" type="button" onClick={handleReset} title="Reset this track">
-            <RotateCcw size={16} strokeWidth={2.5} />
-            Reset Analytics
+          
+          <button className="premium-topbar-action-btn premium-topbar-reset" type="button" onClick={handleReset}>
+            <RotateCcw size={15} strokeWidth={2.5} />
+            Reset
           </button>
-          <span className={`status-pill ${project.status}`}>
+          
+          <div className="premium-topbar-divider" />
+          
+          <span className={`premium-topbar-status ${project.status}`}>
             <span className="status-dot" />
             {projectStatusLabel(project.status)}
           </span>
-          <span className="status-pill">
-            <CalendarClock size={15} />
-            {project.deadline.startsWith("2099") ? "No deadline" : formatDate(project.deadline)}
+          
+          <div className="premium-topbar-divider" />
+          
+          <span className="premium-topbar-deadline">
+            <CalendarClock size={14} />
+            {project.deadline.startsWith("2099") ? "No Deadline" : formatDate(project.deadline)}
           </span>
         </div>
       </header>
@@ -293,107 +399,171 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
       >
         <article className="metric-card">
           <p className="metric-label">
-            Target <Focus size={14} strokeWidth={2.5} />
+            My Progress <Focus size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{project.progress}%</p>
-          <p className="metric-note">completion target</p>
+          <p className="metric-note">how far along I am</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Streak <Activity size={14} strokeWidth={2.5} />
+            Daily Streak <Activity size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{streakCount(project.logs)}</p>
-          <p className="metric-note">days in a row</p>
+          <p className="metric-note">days checked in a row</p>
         </article>
         <article className="metric-card">
           <p className="metric-label">
-            Last 7 days <BarChart3 size={14} strokeWidth={2.5} />
+            This week <BarChart3 size={14} strokeWidth={2.5} />
           </p>
           <p className="metric-value">{summary.completionRate}%</p>
-          <p className="metric-note">completion rate</p>
+          <p className="metric-note">days I logged progress</p>
         </article>
       </motion.section>
 
-      <div className="layout-grid">
-        <div className="section-stack">
-          <section className="glass-panel">
-            <div className="panel-header">
+      <div className="pdv-split-layout">
+        {/* ─── LEFT PANEL ─── */}
+        <div className="pdv-left-panel">
+          {/* Header */}
+          <div className="pdv-track-header">
+            <div className="pdv-track-header-top">
               <div>
-                <p className="eyebrow">Progress</p>
-                <h2 className="panel-title">{project.progress >= 100 ? "Track complete" : "Log your day"}</h2>
+                <p className="pdv-eyebrow">TRACK</p>
+                <h2 className="pdv-track-title">{project.title}</h2>
+                <p className="pdv-track-meta">
+                  {project.deadline.startsWith("2099") ? "Ongoing" : `Due ${formatDate(project.deadline)}`}
+                  {" "} with a {streakCount(project.logs)} day streak.
+                </p>
               </div>
-              <ProgressRing value={project.progress} size={96} stroke={9} />
+              <button className="pdv-calendar-btn" title="View calendar">
+                <CalendarClock size={20} />
+              </button>
             </div>
-            {project.progress < 100 ? (
-              <DailyProgressForm project={project} onSubmit={(status, notes) => submitDailyLog(project.id, status, notes)} />
-            ) : (
-              <div className="alert success" style={{ marginTop: 20 }}>
-                <Check size={18} />
-                This track is complete. No further logs needed.
+            {/* Tags */}
+            <div className="pdv-tag-row">
+              {project.tags.map((tag) => (
+                <span key={tag} className="pdv-tag">{tag}</span>
+              ))}
+            </div>
+          </div>
+
+          {project.progress < 100 ? (
+            <DailyProgressForm project={project} onSubmit={(status, notes) => submitDailyLog(project.id, status, notes)} />
+          ) : (
+            <div className="alert success" style={{ marginTop: 20 }}>
+              <Check size={18} />
+              This track is complete. Great work!
+            </div>
+          )}
+        </div>
+
+        {/* ─── RIGHT PANEL ─── */}
+        <div className="pdv-right-panel">
+          <div className="pdv-tasks-header">
+            <span className="pdv-eyebrow">TASKS</span>
+            <span className="pdv-tasks-count">{(project.tasks || []).filter(t => !t.done).length}</span>
+          </div>
+          <h3 className="pdv-tasks-title">Today&apos;s goals</h3>
+
+          {/* Tasks empty / done state */}
+          {(project.tasks || []).every(t => t.done) ? (
+            <div className="pdv-tasks-done-state">
+              <div className="pdv-circle-check">
+                <svg width="140" height="140" viewBox="0 0 140 140" className="pdv-circle-svg">
+                  <defs>
+                    <filter id="glow-green" x="-30%" y="-30%" width="160%" height="160%">
+                      <feGaussianBlur stdDeviation="4" result="blur" />
+                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
+                    </filter>
+                  </defs>
+                  <circle cx="70" cy="70" r="60" fill="none" stroke="var(--green)" strokeWidth="2" opacity="0.2" />
+                  <circle
+                    cx="70" cy="70" r="60"
+                    fill="none"
+                    stroke="var(--green)"
+                    strokeWidth="2.5"
+                    strokeDasharray="376.9"
+                    strokeDashoffset="0"
+                    strokeLinecap="round"
+                    transform="rotate(-90 70 70)"
+                    filter="url(#glow-green)"
+                  />
+                </svg>
+                <div className="pdv-circle-icon">
+                  <Check size={48} color="var(--green)" strokeWidth={2.5} style={{ filter: "drop-shadow(0 0 8px rgba(35,134,54,0.7))" }} />
+                </div>
+                <span className="pdv-sparkle" style={{ left: 12, top: 24 }}>+</span>
+                <span className="pdv-sparkle" style={{ right: 10, top: 18 }}>+</span>
+                <span className="pdv-sparkle" style={{ right: 6, bottom: 22 }}>+</span>
+                <span className="pdv-sparkle" style={{ left: 8, bottom: 18 }}>+</span>
               </div>
-            )}
-          </section>
-          
-          <section className="glass-panel">
-            <div className="panel-header">
-              <div>
-                <p className="eyebrow">Tasks</p>
-                <h2 className="panel-title">Project milestones</h2>
+              <div className="pdv-all-done-row">
+                <Check size={16} color="var(--green)" strokeWidth={3} />
+                <span>All goals are done.<br />Nothing left for today!</span>
               </div>
             </div>
+          ) : (
             <div className="timeline-list">
               {(project.tasks || []).map((task) => (
-                <div 
-                  className={`timeline-row ${task.done ? 'muted' : ''}`} 
+                <div
                   key={task.id}
+                  className={`pdv-task-row ${task.done ? "pdv-task-done" : ""}`}
                   onClick={() => toggleTask(project.id, task.id)}
-                  style={{ cursor: 'pointer', display: "flex", justifyContent: "space-between", alignItems: "center" }}
                 >
-                  <span style={{ textDecoration: task.done ? 'line-through' : 'none' }}>
-                    <strong>{task.title}</strong>
-                    <span>Due: {formatDate(task.due)}</span>
-                  </span>
-                  <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  <span className="pdv-task-check">
                     {task.done ? <CheckCircle2 size={17} color="var(--green)" /> : <CircleDot size={17} />}
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (window.confirm("Are you sure you want to delete this milestone?")) {
-                          removeTaskFromProject(project.id, task.id);
-                        }
-                      }}
-                      className="ghost-button"
-                      style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}
-                      title="Delete milestone"
-                    >
-                      <X size={14} />
-                    </button>
-                  </div>
+                  </span>
+                  <span className="pdv-task-text">
+                    <strong>{task.title}</strong>
+                    <span>Due {formatDate(task.due)}</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); if (window.confirm("Remove this goal from the list?")) removeTaskFromProject(project.id, task.id); }}
+                    className="pdv-task-delete"
+                    title="Remove goal"
+                  >
+                    <X size={13} />
+                  </button>
                 </div>
               ))}
             </div>
-            
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12, marginTop: 16 }}>
-              <label className="field" style={{ margin: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>New milestone</span>
-                <input className="input" placeholder="e.g. Design DB schema" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), handleAddTask())} />
-              </label>
-              <label className="field" style={{ margin: 0 }}>
-                <span style={{ fontSize: 11, fontWeight: 600, color: "var(--text-secondary)", marginBottom: 4 }}>Due date</span>
-                <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
-              </label>
-              <button type="button" className="secondary-button" onClick={handleAddTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
-                <Plus size={16} />
-              </button>
-            </div>
-          </section>
+          )}
+
+          {/* Add milestone */}
+          <div className="pdv-add-task">
+            <input
+              className="pdv-add-task-input"
+              placeholder="Add a new goal…"
+              value={newTaskTitle}
+              onChange={e => setNewTaskTitle(e.target.value)}
+              onKeyDown={e => e.key === "Enter" && (e.preventDefault(), handleAddTask())}
+            />
+            <label className="pdv-add-task-date-btn" title="Set due date">
+              <CalendarClock size={16} />
+              {newTaskDue ? <span>{newTaskDue}</span> : null}
+              <input
+                type="date"
+                value={newTaskDue}
+                onChange={e => setNewTaskDue(e.target.value)}
+                style={{ position: "absolute", opacity: 0, inset: 0, cursor: "pointer", width: "100%" }}
+              />
+            </label>
+            <button type="button" className="pdv-add-task-btn" onClick={handleAddTask}>
+              <Plus size={16} />
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* ─── BOTTOM SECTIONS ─── */}
+      <div className="layout-grid">
+        <div className="section-stack">
 
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Cadence</p>
-                <h2 className="panel-title">Missed days</h2>
+            <p className="eyebrow">Missed days</p>
+                <h2 className="panel-title">Days I skipped</h2>
               </div>
             </div>
             {missed.length ? (
@@ -402,19 +572,19 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                   <div className="timeline-row" key={day}>
                     <span>
                       <strong>{formatDate(day)}</strong>
-                      <span>No log for this day.</span>
+                      <span>No update was logged on this day.</span>
                     </span>
                     <span className="status-pill overdue">
-                      <span className="status-dot" />
-                      Missed
-                    </span>
+                       <span className="status-dot" />
+                       Skipped
+                     </span>
                   </div>
                 ))}
               </div>
             ) : (
               <div className="alert success">
                 <CheckCircle2 size={18} />
-                No missed days. Keep it up.
+                You&apos;re on a roll — no skipped days!
               </div>
             )}
           </section>
@@ -422,8 +592,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Notes</p>
-                <h2 className="panel-title">Recent logs</h2>
+                <p className="eyebrow">History</p>
+                <h2 className="panel-title">Recent check-ins</h2>
               </div>
             </div>
             <div className="timeline-list">
@@ -435,7 +605,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                   <button className="timeline-row" key={log.id} onClick={() => setSelectedLog(log)}>
                     <span>
                       <strong>{dailyStatusLabel(log.status)}</strong>
-                      <span>{log.notes || `Logged on ${formatDate(log.date)}`}</span>
+                      <span>{log.notes || `Checked in on ${formatDate(log.date)}`}</span>
                     </span>
                     <MessageSquareText size={17} />
                   </button>
@@ -448,8 +618,8 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Trend</p>
-                <h2 className="panel-title">Daily progress</h2>
+                <p className="eyebrow">Progress over time</p>
+                <h2 className="panel-title">Daily activity</h2>
               </div>
             </div>
             <LineChart data={weeklySeries(project)} />
@@ -458,15 +628,15 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <section className="glass-panel">
             <div className="panel-header">
               <div>
-                <p className="eyebrow">Breakdown</p>
-                <h2 className="panel-title">By status</h2>
+                <p className="eyebrow">How I spent my days</p>
+                <h2 className="panel-title">Day breakdown</h2>
               </div>
             </div>
             <BarChart
               values={[
                 { label: "Done", value: summary.completed, tone: "green" },
-                { label: "Work", value: summary.working, tone: "amber" },
-                { label: "Miss", value: summary.missed, tone: "red" }
+                { label: "Partial", value: summary.working, tone: "amber" },
+                { label: "Skipped", value: summary.missed, tone: "red" }
               ]}
             />
           </section>
@@ -491,7 +661,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             >
               <div className="modal-header">
                 <div>
-                  <p className="eyebrow">Log Details</p>
+                  <p className="eyebrow">Entry for this day</p>
                   <h2 className="modal-title">{formatDate(selectedLog.date)}</h2>
                 </div>
                 <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={() => setSelectedLog(null)}>
@@ -501,7 +671,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
 
               <div style={{ padding: "8px 0" }}>
                 <div className="field">
-                  <span>Status</span>
+                  <span>How did it go?</span>
                   <div>
                     <span className="status-pill">
                       {dailyStatusLabel(selectedLog.status)}
@@ -510,14 +680,14 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                 </div>
                 
                 <div className="field" style={{ marginTop: 20 }}>
-                  <span>Notes</span>
+                  <span>What I wrote</span>
                   {selectedLog.notes ? (
                     <p style={{ marginTop: 4, whiteSpace: "pre-wrap", color: "var(--text-primary)", background: "var(--surface-hover)", padding: 12, borderRadius: 6, border: "1px solid var(--border)", lineHeight: 1.6 }}>
                       {selectedLog.notes}
                     </p>
                   ) : (
                     <p style={{ marginTop: 4, color: "var(--text-tertiary)", fontStyle: "italic" }}>
-                      No additional notes provided for this day.
+                      No notes written for this day.
                     </p>
                   )}
                 </div>

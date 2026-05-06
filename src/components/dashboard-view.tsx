@@ -8,19 +8,26 @@ import {
   Activity,
   BarChart3,
   Calendar,
+  CalendarCheck,
+  Check,
   CheckCircle2,
   Clock3,
   Flame,
   FolderKanban,
+  Palette,
   Plus,
+  Rocket,
   SlidersHorizontal,
+  Sparkles,
+  Star,
+  TrendingUp,
   TriangleAlert,
+  Users,
   X
 } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
 import { addDays, formatDate, missedDays, oneYearFromToday, projectStatusLabel, streakCount } from "@/lib/progress";
 import type { Priority, Project, ProjectInput, ProjectStatus } from "@/lib/types";
-import { ProgressRing } from "@/components/ui/progress-ring";
 import { ProjectSkeletons } from "@/components/ui/skeletons";
 
 type Filter = "all" | ProjectStatus;
@@ -46,32 +53,92 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.4 }}
     >
-      <Link className="project-card" href={`/projects/${project.id}`}>
-        <div>
-          <div className="card-topline">
-            <span className={`status-pill ${project.status}`}>
-              <span className="status-dot" />
-              {projectStatusLabel(project.status)}
-            </span>
-            <span className="priority-pill">{priorityLabel(project.priority)}</span>
+      <Link className="premium-project-card" href={`/projects/${project.id}`}>
+        <div className="premium-card-content">
+          <div className="premium-top-section">
+            <div className="premium-top-left">
+              <div className="premium-status-circle">
+                <Check size={24} strokeWidth={3} />
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                <span className="premium-status-text">
+                  {projectStatusLabel(project.status)}
+                </span>
+                <span className="premium-priority">
+                  <Star size={12} fill="currentColor" className="icon" /> {priorityLabel(project.priority)} Priority
+                </span>
+              </div>
+            </div>
+            
+            <div className="premium-dots">
+              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+            </div>
           </div>
-          <h3 className="project-title">{project.title}</h3>
-          <p className="project-description">{project.description}</p>
-          <div className="tag-row">
+
+          <h3 className="premium-title">{project.title}</h3>
+          <p className="premium-subtitle">{project.description}</p>
+          
+          <div className="premium-tags">
             {project.tags.slice(0, 3).map((tag) => (
-              <span className="tag-pill" key={tag}>
-                {tag}
+              <span className="premium-tag" key={tag}>
+                {tag.toLowerCase().includes('design') ? <Palette size={14} /> : tag.toLowerCase().includes('sprint') ? <Rocket size={14} /> : null} {tag}
               </span>
             ))}
           </div>
-        </div>
 
-        <div className="project-footer">
-          <div className="deadline">
-            <span>{project.deadline.startsWith("2099") ? "No deadline" : formatDate(project.deadline)}</span>
-            <span>{missed ? `${missed} missed` : `${streakCount(project.logs)}d streak`}</span>
+          <div className="premium-divider"></div>
+
+          <div className="premium-footer-card">
+            <div className="premium-footer-left">
+              <div className="premium-calendar-icon">
+                <CalendarCheck size={20} />
+              </div>
+              <div className="premium-footer-stats">
+                <span className="premium-no-deadline">
+                  {project.deadline.startsWith("2099") ? "Ongoing" : `Due ${formatDate(project.deadline)}`}
+                </span>
+                <span className="premium-missed-count">
+                  {missed ? `${missed} days` : `${streakCount(project.logs)} days`}
+                </span>
+                <span className="premium-missed-label">
+                  {missed ? "Pending updates" : "Current streak"}
+                </span>
+              </div>
+            </div>
+            
+            <div className="premium-footer-right">
+              <div className="premium-vertical-divider"></div>
+              <div className="premium-ring-container">
+                <svg width="56" height="56" viewBox="0 0 56 56">
+                  <defs>
+                    <mask id={`mask-${project.id}`}>
+                      <circle 
+                        cx="28" cy="28" r="24" fill="none" 
+                        stroke="#fff" strokeWidth="8"
+                        strokeDasharray={2 * Math.PI * 24}
+                        strokeDashoffset={2 * Math.PI * 24 * (1 - project.progress / 100)}
+                        transform="rotate(-90 28 28)"
+                      />
+                    </mask>
+                  </defs>
+                  <circle cx="28" cy="28" r="24" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5" />
+                  <circle 
+                    cx="28" cy="28" r="24" fill="none" 
+                    strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5" 
+                    mask={`url(#mask-${project.id})`}
+                  />
+                  <text x="28" y="26" dominantBaseline="middle" textAnchor="middle" className="premium-ring-value">
+                    {Math.min(100, Math.max(0, project.progress))}
+                  </text>
+                  <text x="28" y="38" dominantBaseline="middle" textAnchor="middle" className="premium-ring-label">
+                    % Done
+                  </text>
+                </svg>
+              </div>
+            </div>
           </div>
-          <ProgressRing value={project.progress} />
         </div>
       </Link>
     </motion.div>
@@ -153,8 +220,8 @@ function CreateProjectModal({
         >
           <div className="modal-header">
             <div>
-              <p className="eyebrow">New track</p>
-              <h2 className="modal-title">Define track details</h2>
+              <p className="eyebrow">Start a new track</p>
+              <h2 className="modal-title">What do you want to work on?</h2>
             </div>
             <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
               <X size={17} />
@@ -164,7 +231,7 @@ function CreateProjectModal({
           <form className="progress-form" onSubmit={submit}>
             <label className="field">
               <span>Title</span>
-              <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="Weekly report launch" />
+              <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="e.g. Learn React, Ship landing page" />
             </label>
 
             <label className="field">
@@ -174,7 +241,7 @@ function CreateProjectModal({
                 value={description}
                 onChange={(event) => setDescription(event.target.value)}
                 required
-                placeholder="What outcome are you tracking?"
+                placeholder="Describe what you want to achieve…"
               />
             </label>
 
@@ -195,7 +262,7 @@ function CreateProjectModal({
             </div>
 
             <div className="field">
-              <span>Task Duration</span>
+              <span>How long is this track?</span>
               <select
                 className="select"
                 onChange={(e) => {
@@ -206,7 +273,7 @@ function CreateProjectModal({
                   }
                 }}
               >
-                <option value="0">Custom or Long-term</option>
+                <option value="0">I&apos;ll set a custom date</option>
                 {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
                   <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
                 ))}
@@ -220,18 +287,18 @@ function CreateProjectModal({
                 onChange={(e) => setHasDeadline(!e.target.checked)}
                 style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
               />
-              <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>This track has no specific deadline</span>
+              <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>No end date (ongoing)</span>
             </label>
 
             {hasDeadline && (
               <label className="field">
-                <span>Select specific deadline</span>
+                <span>Pick an end date</span>
                 <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
               </label>
             )}
 
             <div className="section-divider" />
-            <p className="eyebrow">Milestones</p>
+            <p className="eyebrow">Goals &amp; Checkpoints</p>
 
             <div className="section-stack" style={{ gap: 8 }}>
               {tasks.map((task, i) => (
@@ -248,8 +315,8 @@ function CreateProjectModal({
 
               <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
                 <label className="field">
-                  <span>Milestone name</span>
-                  <input className="input" placeholder="e.g., Complete research phase" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
+                  <span>Goal name</span>
+                  <input className="input" placeholder="e.g. Finish homepage design" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
                 </label>
                 <label className="field">
                   <span>Due date</span>
@@ -269,7 +336,7 @@ function CreateProjectModal({
               </button>
               <button className="primary-button" type="submit">
                 <Plus size={17} />
-                Start Track
+                Create Track
               </button>
             </div>
           </form>
@@ -322,67 +389,95 @@ export function DashboardView() {
 
   return (
     <div className="page">
-      <header className="topbar">
-        <div>
-          <p className="eyebrow">Overview</p>
-          <h1 className="page-title">Progress Tracker</h1>
-          <p className="page-subtitle">
-            All your active tracks, deadlines, and streaks in one place.
-          </p>
-        </div>
-        <div className="toolbar">
-          <button className="primary-button" type="button" onClick={() => setModalOpen(true)}>
-            <Plus size={16} strokeWidth={2.5} />
+      <div className="premium-dashboard-header">
+        <div className="premium-header-top">
+          <div className="premium-header-left">
+            <div className="premium-header-text">
+              <span className="premium-header-eyebrow">OVERVIEW</span>
+              <h1 className="premium-header-title">Progress <span style={{ color: "var(--green)" }}>Tracker</span></h1>
+              <p className="premium-header-subtitle">All your active tracks, deadlines, and streaks in one place.</p>
+            </div>
+          </div>
+          <button className="premium-new-track-btn solid" type="button" onClick={() => setModalOpen(true)}>
+            <Sparkles size={16} />
             New Track
           </button>
         </div>
-      </header>
 
-      {error && (
-        <div className="alert danger" style={{ margin: "16px 0 24px" }}>
-          <TriangleAlert size={18} />
-          <span>{error}</span>
+        <div className="premium-metrics-row">
+          <div className="premium-metric-card-wrapper" style={{ zIndex: 4 }}>
+            <div className="premium-metric-card shape-left">
+              <div className="premium-metric-icon-box blue">
+                <svg width="56" height="56" viewBox="0 0 56 56" className="metric-ring">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="150.7" strokeDashoffset={150.7 * (1 - 0.7)} strokeLinecap="round" transform="rotate(-90 28 28)" />
+                </svg>
+                <Users size={20} color="var(--accent)" />
+              </div>
+              <div className="premium-metric-content">
+                <span className="premium-metric-label blue">ACTIVE</span>
+                <span className="premium-metric-value">{stats.active}</span>
+                <span className="premium-metric-note">tracks in progress</span>
+              </div>
+              <div className="premium-metric-glow-line blue"></div>
+            </div>
+          </div>
+
+          <div className="premium-metric-card-wrapper" style={{ zIndex: 3, marginLeft: "-16px" }}>
+            <div className="premium-metric-card shape-middle">
+              <div className="premium-metric-icon-box green">
+                <svg width="56" height="56" viewBox="0 0 56 56" className="metric-ring">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="150.7" strokeDashoffset={150.7 * (1 - stats.average / 100)} strokeLinecap="round" transform="rotate(-90 28 28)" />
+                </svg>
+                <TrendingUp size={20} color="var(--green)" />
+              </div>
+              <div className="premium-metric-content">
+                <span className="premium-metric-label green">AVG PROGRESS</span>
+                <span className="premium-metric-value">{stats.average}%</span>
+                <span className="premium-metric-note">across active tracks</span>
+              </div>
+              <div className="premium-metric-glow-line green"></div>
+            </div>
+          </div>
+
+          <div className="premium-metric-card-wrapper" style={{ zIndex: 2, marginLeft: "-16px" }}>
+            <div className="premium-metric-card shape-middle">
+              <div className="premium-metric-icon-box purple">
+                <svg width="56" height="56" viewBox="0 0 56 56" className="metric-ring">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="150.7" strokeDashoffset="0" strokeLinecap="round" transform="rotate(-90 28 28)" />
+                </svg>
+                <Check size={20} color="#a371f7" strokeWidth={3} />
+              </div>
+              <div className="premium-metric-content">
+                <span className="premium-metric-label purple">COMPLETED</span>
+                <span className="premium-metric-value">{stats.completed}</span>
+                <span className="premium-metric-note">tracks finished</span>
+              </div>
+              <div className="premium-metric-glow-line purple"></div>
+            </div>
+          </div>
+
+          <div className="premium-metric-card-wrapper" style={{ zIndex: 1, marginLeft: "-16px" }}>
+            <div className="premium-metric-card shape-right">
+              <div className="premium-metric-icon-box orange">
+                <svg width="56" height="56" viewBox="0 0 56 56" className="metric-ring">
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" opacity="0.2" />
+                  <circle cx="28" cy="28" r="24" fill="none" stroke="currentColor" strokeWidth="3" strokeDasharray="150.7" strokeDashoffset="0" strokeLinecap="round" transform="rotate(-90 28 28)" />
+                </svg>
+                <TriangleAlert size={20} color="var(--amber)" />
+              </div>
+              <div className="premium-metric-content">
+                <span className="premium-metric-label orange">OVERDUE</span>
+                <span className="premium-metric-value">{stats.overdue}</span>
+                <span className="premium-metric-note">need attention</span>
+              </div>
+              <div className="premium-metric-glow-line orange"></div>
+            </div>
+          </div>
         </div>
-      )}
-
-      {/* Stats — first card spans 2 cols to create visual hierarchy */}
-      <motion.section
-        className="stats-grid"
-        aria-label="Workspace stats"
-        style={{ gridTemplateColumns: "repeat(3, 1fr)" }}
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.5 }}
-      >
-        <article className="metric-card featured" style={{ gridColumn: "span 2", background: "var(--surface-hover)" }}>
-          <p className="metric-label">
-            Active <Activity size={14} strokeWidth={2} />
-          </p>
-          <p className="metric-value">{stats.active}</p>
-          <p className="metric-note">tracks in progress</p>
-        </article>
-        <article className="metric-card">
-          <p className="metric-label">
-            Avg progress <BarChart3 size={14} strokeWidth={2} />
-          </p>
-          <p className="metric-value">{stats.average}%</p>
-          <p className="metric-note">across active tracks</p>
-        </article>
-        <article className="metric-card">
-          <p className="metric-label">
-            Completed <CheckCircle2 size={14} strokeWidth={2} />
-          </p>
-          <p className="metric-value">{stats.completed}</p>
-          <p className="metric-note">tracks finished</p>
-        </article>
-        <article className="metric-card">
-          <p className="metric-label">
-            Overdue <TriangleAlert size={14} strokeWidth={2} />
-          </p>
-          <p className="metric-value" style={stats.overdue > 0 ? { color: "var(--red)" } : {}}>{stats.overdue}</p>
-          <p className="metric-note">need attention</p>
-        </article>
-      </motion.section>
+      </div>
 
       <div className="filter-row">
         <div className="segmented-control" aria-label="Project filters">
@@ -436,7 +531,7 @@ export function DashboardView() {
       ) : (
         <div className="empty-state">
           <FolderKanban strokeWidth={1.5} />
-          <span>No projects match this view.</span>
+          <span>No tracks here yet. Create one to get started!</span>
         </div>
       )}
 
