@@ -35,9 +35,25 @@ async function fetchWithUser(url: string, userId: string, options: RequestInit =
   });
 }
 
-function scoreProgress(current: number, status: DailyStatus) {
-  const gain = status === "completed" ? 10 : status === "working" ? 4 : 0;
-  return Math.min(100, Math.max(current, current + gain));
+/**
+ * Honest progress = max of (completed log days / total days elapsed) and (completed tasks / total tasks).
+ * Missed days and not_completed entries drag the log % down naturally.
+ * Caps at 99 until explicitly finalized via finalizeProject.
+ */
+function computeProgress(logs: { status: string; date: string }[], tasks: { done: boolean }[], createdAt: string, finalized = false): number {
+  if (finalized) return 100;
+  const created = new Date(createdAt);
+  const today = new Date();
+  const dayMs = 24 * 60 * 60 * 1000;
+  const startUtc = Date.UTC(created.getFullYear(), created.getMonth(), created.getDate());
+  const todayUtc = Date.UTC(today.getFullYear(), today.getMonth(), today.getDate());
+  const totalDays = Math.max(1, Math.floor((todayUtc - startUtc) / dayMs) + 1);
+  const completedDays = logs.filter((l) => l.status === "completed").length;
+  const logProgress = Math.round((completedDays / totalDays) * 100);
+
+  const taskProgress = tasks.length ? Math.round((tasks.filter((t) => t.done).length / tasks.length) * 100) : 0;
+
+  return Math.min(99, Math.max(logProgress, taskProgress));
 }
 
 export function ProjectProvider({ children }: { children: ReactNode }) {
@@ -151,20 +167,30 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             return project;
           }
 
+          const today = dateKey();
+          // Replace today's log if it already exists, otherwise append
+          const existingIndex = project.logs.findIndex((l) => l.date === today);
           const nextLog = {
-            id: `log-${Date.now()}`,
+            id: existingIndex >= 0 ? project.logs[existingIndex].id : `log-${Date.now()}`,
             projectId,
-            date: dateKey(),
+            date: today,
             status,
             notes: notes?.trim(),
-            createdAt: now
+            createdAt: existingIndex >= 0 ? project.logs[existingIndex].createdAt : now
           };
+
+          const nextLogs =
+            existingIndex >= 0
+              ? project.logs.map((l, i) => (i === existingIndex ? nextLog : l))
+              : [...project.logs, nextLog];
+
+          const nextProgress = computeProgress(nextLogs, project.tasks, project.createdAt);
 
           const updated = {
             ...project,
-            progress: scoreProgress(project.progress, status),
+            progress: nextProgress,
             updatedAt: now,
-            logs: [...project.logs, nextLog]
+            logs: nextLogs
           };
 
           fetchWithUser("/api/projects", ownerId, {
@@ -203,14 +229,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
           }
 
           const tasks = project.tasks.map((task) => (task.id === taskId ? { ...task, done: !task.done } : task));
-          const taskProgress = tasks.length
-            ? Math.round((tasks.filter((task) => task.done).length / tasks.length) * 100)
-            : project.progress;
-
+          
           const updated = {
             ...project,
             tasks,
-            progress: Math.max(project.progress, taskProgress),
+            progress: computeProgress(project.logs, tasks, project.createdAt, project.status === "completed"),
             updatedAt: now
           };
 
@@ -248,10 +271,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             due,
             done: false
           };
+          const tasks = [...project.tasks, newTask];
 
           const updated = {
             ...project,
-            tasks: [...project.tasks, newTask],
+            tasks,
+            progress: computeProgress(project.logs, tasks, project.createdAt, project.status === "completed"),
             updatedAt: now
           };
 
@@ -261,6 +286,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
               id: projectId,
               updates: {
                 tasks: updated.tasks,
+                progress: updated.progress,
                 updatedAt: updated.updatedAt
               }
             })
@@ -282,9 +308,11 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
             return project;
           }
 
+          const tasks = project.tasks.filter((task) => task.id !== taskId);
           const updated = {
             ...project,
-            tasks: project.tasks.filter((task) => task.id !== taskId),
+            tasks,
+            progress: computeProgress(project.logs, tasks, project.createdAt, project.status === "completed"),
             updatedAt: now
           };
 
@@ -294,6 +322,7 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
               id: projectId,
               updates: {
                 tasks: updated.tasks,
+                progress: updated.progress,
                 updatedAt: updated.updatedAt
               }
             })
