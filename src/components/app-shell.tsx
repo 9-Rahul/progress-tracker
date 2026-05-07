@@ -3,10 +3,11 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState } from "react";
-import { BarChart3, Compass, Focus, LayoutDashboard, LogOut, Menu, Moon, Plus, RotateCcw, Sun, X } from "lucide-react";
+import { BarChart3, Compass, Focus, LayoutDashboard, LogOut, Menu, Moon, Plus, RotateCcw, Sun, X, Trash2 } from "lucide-react";
 import { useAuth, useTheme } from "@/components/providers";
 import { useProjectStore } from "@/hooks/use-project-store";
 import { motion, AnimatePresence } from "framer-motion";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -34,21 +35,15 @@ export function AppShell({ children }: { children: ReactNode }) {
   const router = useRouter();
   const { theme, toggleTheme } = useTheme();
   const { user, signOutUser } = useAuth();
-  const { projects, loading, resetData } = useProjectStore();
+  const { projects, loading, resetData, deleteProject } = useProjectStore();
 
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [resetConfirmOpen, setResetConfirmOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
 
   const handleSignOut = async () => {
     await signOutUser();
     router.push("/auth");
-  };
-
-  const handleReset = async () => {
-    if (window.confirm("Are you sure you want to reset all progress? This will clear your daily logs for all tracks but will NOT delete your tracks.")) {
-      await resetData();
-      router.push("/dashboard");
-      router.refresh();
-    }
   };
 
   const closeDrawer = () => setDrawerOpen(false);
@@ -94,16 +89,28 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           ) : (
             projects.map((project) => (
-              <li key={project.id}>
+              <li key={project.id} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                 <Link
                   className={`nav-link ${pathname === `/projects/${project.id}` ? "active" : ""}`}
                   href={`/projects/${project.id}`}
+                  style={{ flex: 1, paddingRight: 40 }}
                 >
                   <div className={`status-dot ${project.status}`} style={{ width: 8, height: 8 }} />
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                     {project.title}
                   </span>
                 </Link>
+                <button 
+                  className="ghost-button" 
+                  style={{ position: 'absolute', right: 8, minHeight: 'auto', padding: 4, opacity: 0.4 }}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    setDeleteId(project.id);
+                  }}
+                >
+                  <Trash2 size={12} />
+                </button>
               </li>
             ))
           )}
@@ -120,7 +127,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <button className="secondary-button" type="button" onClick={toggleTheme} title={theme === "dark" ? "Light mode" : "Dark mode"}>
               {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
             </button>
-            <button className="secondary-button danger" type="button" onClick={handleReset} title="Reset all data">
+            <button className="secondary-button danger" type="button" onClick={() => setResetConfirmOpen(true)} title="Reset all data">
               <RotateCcw size={17} />
               Reset
             </button>
@@ -317,7 +324,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                   <button className="secondary-button" type="button" onClick={toggleTheme} title={theme === "dark" ? "Light mode" : "Dark mode"}>
                     {theme === "dark" ? <Sun size={17} /> : <Moon size={17} />}
                   </button>
-                  <button className="secondary-button danger" type="button" onClick={() => { closeDrawer(); handleReset(); }} title="Reset all data">
+                  <button className="secondary-button danger" type="button" onClick={() => { closeDrawer(); setResetConfirmOpen(true); }} title="Reset all data">
                     <RotateCcw size={17} />
                     Reset
                   </button>
@@ -342,6 +349,28 @@ export function AppShell({ children }: { children: ReactNode }) {
           </>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={resetConfirmOpen}
+        onClose={() => setResetConfirmOpen(false)}
+        onConfirm={async () => {
+          await resetData();
+          router.push("/dashboard");
+          router.refresh();
+        }}
+        title="Reset All Progress"
+        description="Are you sure you want to reset all progress? This will clear your daily logs for all tracks but will NOT delete the tracks themselves."
+        confirmLabel="Reset Data"
+      />
+
+      <ConfirmModal
+        isOpen={!!deleteId}
+        onClose={() => setDeleteId(null)}
+        onConfirm={() => deleteId && deleteProject(deleteId)}
+        title="Delete Track"
+        description={`Are you sure you want to delete "${projects.find(p => p.id === deleteId)?.title}"? This cannot be undone.`}
+        confirmLabel="Delete Track"
+      />
     </div>
   );
 }
