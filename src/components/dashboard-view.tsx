@@ -107,7 +107,7 @@ function ProjectCard({ project, index, deleteProject }: { project: Project; inde
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setDeleteConfirmId(project.id);
+            deleteProject(project.id);
           }}
         >
           <Trash2 size={16} />
@@ -633,7 +633,7 @@ export function DashboardView() {
                 </div>
                 <div className="project-grid">
                   {grouped[status].map((project, index) => (
-                    <ProjectCard key={project.id} project={project} index={index} deleteProject={deleteProject} />
+                    <ProjectCard key={project.id} project={project} index={index} deleteProject={setDeleteConfirmId} />
                   ))}
                 </div>
               </section>
