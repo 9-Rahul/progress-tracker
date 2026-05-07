@@ -84,11 +84,14 @@ function toAuthUser(user: {
   };
 }
 
-async function syncUser(user: AuthUser) {
+async function syncUser(user: AuthUser, token?: string) {
   try {
     await fetch("/api/users", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        ...(token ? { Authorization: `Bearer ${token}` } : {})
+      },
       body: JSON.stringify({
         firebaseUid: user.id,
         name: user.name,
@@ -114,8 +117,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
     const unsubscribe = onAuthStateChanged(firebaseAuth, async (firebaseUser) => {
       const nextUser = firebaseUser ? toAuthUser(firebaseUser) : null;
       setUser(nextUser);
-      if (nextUser) {
-        await syncUser(nextUser);
+      if (nextUser && firebaseUser) {
+        const token = await firebaseUser.getIdToken();
+        await syncUser(nextUser, token);
       }
       setLoading(false);
     });
@@ -140,8 +144,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
         }
         const credential = await signInWithPopup(firebaseAuth, googleProvider);
         const nextUser = toAuthUser(credential.user);
+        const token = await credential.user.getIdToken();
         setUser(nextUser);
-        await syncUser(nextUser);
+        await syncUser(nextUser, token);
       },
       signInWithEmail: async (email, password) => {
         if (!firebaseAuth) {
@@ -150,8 +155,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
         }
         const credential = await signInWithEmailAndPassword(firebaseAuth, email, password);
         const nextUser = toAuthUser(credential.user);
+        const token = await credential.user.getIdToken();
         setUser(nextUser);
-        await syncUser(nextUser);
+        await syncUser(nextUser, token);
       },
       signUpWithEmail: async (name, email, password) => {
         if (!firebaseAuth) {
@@ -161,8 +167,9 @@ function AuthProvider({ children }: { children: ReactNode }) {
         const credential = await createUserWithEmailAndPassword(firebaseAuth, email, password);
         await updateProfile(credential.user, { displayName: name });
         const nextUser = toAuthUser({ ...credential.user, displayName: name });
+        const token = await credential.user.getIdToken();
         setUser(nextUser);
-        await syncUser(nextUser);
+        await syncUser(nextUser, token);
       },
       signOutUser: async () => {
         setUser(null);
@@ -181,14 +188,26 @@ function AuthProvider({ children }: { children: ReactNode }) {
 }
 
 import { ProjectProvider } from "@/components/project-context";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { Toaster } from "sonner";
 
 export function Providers({ children }: { children: ReactNode }) {
   return (
-    <ThemeProvider>
-      <AuthProvider>
-        <ProjectProvider>{children}</ProjectProvider>
-      </AuthProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={new QueryClient({
+      defaultOptions: {
+        queries: {
+          staleTime: 1000 * 60 * 5, // 5 minutes
+          retry: 1
+        }
+      }
+    })}>
+      <Toaster position="bottom-right" theme="dark" richColors closeButton />
+      <ThemeProvider>
+        <AuthProvider>
+          <ProjectProvider>{children}</ProjectProvider>
+        </AuthProvider>
+      </ThemeProvider>
+    </QueryClientProvider>
   );
 }
 
