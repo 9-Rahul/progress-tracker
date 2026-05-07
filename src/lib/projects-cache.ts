@@ -15,8 +15,11 @@ export const getCachedProjects = unstable_cache(
       .sort({ updatedAt: -1 })
       .toArray();
   },
-  ["user-projects"],
-  { tags: ["projects"], revalidate: 300 }
+  ["projects-list"], // Key parts will automatically include the arguments passed to the function
+  { 
+    tags: ["projects"], 
+    revalidate: 300 // 5 minutes
+  }
 );
 
 /**
