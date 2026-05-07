@@ -5,16 +5,39 @@ import { adminAuth } from "./firebase-admin";
  * Extracts and verifies the ownerId from the request headers using Firebase Admin.
  * This is the "Gold Standard" for SaaS security.
  */
+// Simple in-memory cache for verified tokens to speed up repeated requests
+const verificationCache = new Map<string, { uid: string; expires: number }>();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 export async function getAuthUser(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get("Authorization");
 
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
     
+    // Check cache first
+    const cached = verificationCache.get(token);
+    if (cached && cached.expires > Date.now()) {
+      return cached.uid;
+    }
+    
     try {
-      // ── CRITICAL SECURITY STEP ──
-      // This verifies the token's signature, expiration, and project ID
       const decoded = await adminAuth.verifyIdToken(token);
+      
+      // Store in cache
+      verificationCache.set(token, { 
+        uid: decoded.uid, 
+        expires: Date.now() + CACHE_TTL 
+      });
+
+      // Cleanup old cache entries occasionally
+      if (verificationCache.size > 1000) {
+        const now = Date.now();
+        for (const [key, val] of verificationCache.entries()) {
+          if (val.expires < now) verificationCache.delete(key);
+        }
+      }
+
       return decoded.uid;
     } catch (error) {
       console.error("Auth verification failed:", error);

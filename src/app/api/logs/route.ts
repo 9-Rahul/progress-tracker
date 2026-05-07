@@ -2,11 +2,11 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { dateKey } from "@/lib/progress";
+import { getAuthUser } from "@/lib/auth-utils";
 import type { DailyStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-
 
 const dayMs = 24 * 60 * 60 * 1000;
 
@@ -21,14 +21,11 @@ function nextProgress(current: number, status: DailyStatus) {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get("userId");
+    const ownerId = await getAuthUser(request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const projectId = request.nextUrl.searchParams.get("projectId");
-
-    if (!userId) {
-      return NextResponse.json({ message: "userId is required." }, { status: 400 });
-    }
-
-    const filter: Record<string, string> = { ownerId: userId };
+    const filter: Record<string, string> = { ownerId };
     if (projectId) {
       filter.projectId = projectId;
     }
@@ -39,26 +36,27 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ logs });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to load logs.";
-    const status = message.includes("MONGODB_URI") ? 503 : 500;
-    return NextResponse.json({ message }, { status });
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
+    const ownerId = await getAuthUser(request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const body = (await request.json()) as {
-      ownerId?: string;
       projectId?: string;
       status?: DailyStatus;
       notes?: string;
     };
 
-    if (!body.ownerId || !body.projectId || !isDailyStatus(body.status)) {
-      return NextResponse.json({ message: "ownerId, projectId, and status are required." }, { status: 400 });
+    if (!body.projectId || !isDailyStatus(body.status)) {
+      return NextResponse.json({ message: "projectId and status are required." }, { status: 400 });
     }
 
     const db = await getDatabase();
-    const project = await db.collection("projects").findOne({ id: body.projectId, ownerId: body.ownerId });
+    const project = await db.collection("projects").findOne({ id: body.projectId, ownerId });
     if (!project) {
       return NextResponse.json({ message: "Project not found." }, { status: 404 });
     }
@@ -72,7 +70,7 @@ export async function POST(request: NextRequest) {
 
     const log = {
       id: randomUUID(),
-      ownerId: body.ownerId,
+      ownerId,
       projectId: body.projectId,
       date: dateKey(now),
       status: body.status,
@@ -82,7 +80,7 @@ export async function POST(request: NextRequest) {
 
     await db.collection("dailyLogs").insertOne(log);
     await db.collection("projects").updateOne(
-      { id: body.projectId, ownerId: body.ownerId },
+      { id: body.projectId, ownerId },
       {
         $set: {
           progress: nextProgress(Number(project.progress ?? 0), body.status),
