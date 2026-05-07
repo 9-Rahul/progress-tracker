@@ -23,12 +23,59 @@ import {
   TrendingUp,
   TriangleAlert,
   Users,
-  X
+  X,
+  Command,
+  Trash2
 } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
 import { addDays, formatDate, missedDays, oneYearFromToday, projectStatusLabel, streakCount } from "@/lib/progress";
 import type { Priority, Project, ProjectInput, ProjectStatus } from "@/lib/types";
-import { ProjectSkeletons } from "@/components/ui/skeletons";
+import { MetricsSkeletons, ProjectSkeletons } from "@/components/ui/skeletons";
+import { useRef } from "react";
+
+function FocusTrap({ children, active, onClose }: { children: React.ReactNode; active: boolean; onClose: () => void }) {
+  const rootRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!active) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+      if (e.key !== "Tab") return;
+
+      const focusable = rootRef.current?.querySelectorAll(
+        'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+      );
+      if (!focusable) return;
+
+      const first = focusable[0] as HTMLElement;
+      const last = focusable[focusable.length - 1] as HTMLElement;
+
+      if (e.shiftKey) {
+        if (document.activeElement === first) {
+          last.focus();
+          e.preventDefault();
+        }
+      } else {
+        if (document.activeElement === last) {
+          first.focus();
+          e.preventDefault();
+        }
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    // Focus first element
+    const first = rootRef.current?.querySelector(
+      'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+    ) as HTMLElement;
+    first?.focus();
+
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [active, onClose]);
+
+  return <div ref={rootRef} style={{ outline: 'none' }}>{children}</div>;
+}
 
 type Filter = "all" | ProjectStatus;
 type Sort = "recent" | "deadline" | "progress";
@@ -44,7 +91,7 @@ function priorityLabel(priority: Priority) {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
 }
 
-function ProjectCard({ project, index }: { project: Project; index: number }) {
+function ProjectCard({ project, index, deleteProject }: { project: Project; index: number; deleteProject: (id: string) => void }) {
   const missed = missedDays(project).length;
 
   return (
@@ -53,7 +100,19 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
       animate={{ opacity: 1, y: 0 }}
       transition={{ delay: index * 0.04, duration: 0.4 }}
     >
-      <Link className="premium-project-card" href={`/projects/${project.id}`}>
+      <div style={{ position: 'relative' }}>
+        <button 
+          className="ghost-button" 
+          style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, color: 'var(--text-muted)', minHeight: 'auto', padding: 6 }}
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setDeleteConfirmId(project.id);
+          }}
+        >
+          <Trash2 size={16} />
+        </button>
+        <Link className="premium-project-card" href={`/projects/${project.id}`}>
         <div className="premium-card-content">
           <div className="premium-top-section">
             <div className="premium-top-left">
@@ -140,7 +199,8 @@ function ProjectCard({ project, index }: { project: Project; index: number }) {
             </div>
           </div>
         </div>
-      </Link>
+        </Link>
+      </div>
     </motion.div>
   );
 }
@@ -207,152 +267,171 @@ function CreateProjectModal({
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
       >
-        <motion.section
-          className="modal-panel"
-          role="dialog"
-          aria-modal="true"
-          aria-label="Create project"
-          onMouseDown={(event) => event.stopPropagation()}
-          initial={{ scale: 0.95, opacity: 0, y: 20 }}
-          animate={{ scale: 1, opacity: 1, y: 0 }}
-          exit={{ scale: 0.95, opacity: 0, y: 20 }}
-          transition={{ type: "spring", damping: 25, stiffness: 300 }}
-        >
-          <div className="modal-header">
-            <div>
-              <p className="eyebrow">Start a new track</p>
-              <h2 className="modal-title">What do you want to work on?</h2>
+        <FocusTrap active={true} onClose={onClose}>
+          <motion.section
+            className="modal-panel"
+            role="dialog"
+            aria-modal="true"
+            aria-label="Create project"
+            onMouseDown={(event) => event.stopPropagation()}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.95, opacity: 0, y: 20 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+          >
+            <div className="modal-header">
+              <div>
+                <p className="eyebrow">Start a new track</p>
+                <h2 className="modal-title">What do you want to work on?</h2>
+              </div>
+              <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
+                <X size={17} />
+              </button>
             </div>
-            <button className="icon-button" type="button" aria-label="Close" title="Close" onClick={onClose}>
-              <X size={17} />
-            </button>
-          </div>
 
-          <form className="progress-form" onSubmit={submit}>
-            <label className="field">
-              <span>Title</span>
-              <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="e.g. Learn React, Ship landing page" />
-            </label>
-
-            <label className="field">
-              <span>Description</span>
-              <textarea
-                className="textarea"
-                value={description}
-                onChange={(event) => setDescription(event.target.value)}
-                required
-                placeholder="Describe what you want to achieve…"
-              />
-            </label>
-
-            <div className="field-grid">
+            <form className="progress-form" onSubmit={submit}>
               <label className="field">
-                <span>Tags</span>
-                <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Backend" />
+                <span>Title</span>
+                <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="e.g. Learn React, Ship landing page" />
               </label>
 
               <label className="field">
-                <span>Priority</span>
-                <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
-                  <option value="low">Low</option>
-                  <option value="medium">Medium</option>
-                  <option value="high">High</option>
+                <span>Description</span>
+                <textarea
+                  className="textarea"
+                  value={description}
+                  onChange={(event) => setDescription(event.target.value)}
+                  required
+                  placeholder="Describe what you want to achieve…"
+                />
+              </label>
+
+              <div className="field-grid">
+                <label className="field">
+                  <span>Tags</span>
+                  <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Backend" />
+                </label>
+
+                <label className="field">
+                  <span>Priority</span>
+                  <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                  </select>
+                </label>
+              </div>
+
+              <div className="field">
+                <span>How long is this track?</span>
+                <select
+                  className="select"
+                  onChange={(e) => {
+                    const days = parseInt(e.target.value);
+                    if (days > 0) {
+                      setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
+                      setHasDeadline(true);
+                    }
+                  }}
+                >
+                  <option value="0">I&apos;ll set a custom date</option>
+                  {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
+                    <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
+                  ))}
                 </select>
+              </div>
+
+              <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={!hasDeadline}
+                  onChange={(e) => setHasDeadline(!e.target.checked)}
+                  style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
+                />
+                <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>No end date (ongoing)</span>
               </label>
-            </div>
 
-            <div className="field">
-              <span>How long is this track?</span>
-              <select
-                className="select"
-                onChange={(e) => {
-                  const days = parseInt(e.target.value);
-                  if (days > 0) {
-                    setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
-                    setHasDeadline(true);
-                  }
-                }}
-              >
-                <option value="0">I&apos;ll set a custom date</option>
-                {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
-                  <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
-                ))}
-              </select>
-            </div>
+              {hasDeadline && (
+                <label className="field">
+                  <span>Pick an end date</span>
+                  <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
+                </label>
+              )}
 
-            <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
-              <input
-                type="checkbox"
-                checked={!hasDeadline}
-                onChange={(e) => setHasDeadline(!e.target.checked)}
-                style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
-              />
-              <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>No end date (ongoing)</span>
-            </label>
+              <div className="section-divider" />
+              <p className="eyebrow">Goals &amp; Checkpoints</p>
 
-            {hasDeadline && (
-              <label className="field">
-                <span>Pick an end date</span>
-                <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
-              </label>
-            )}
-
-            <div className="section-divider" />
-            <p className="eyebrow">Goals &amp; Checkpoints</p>
-
-            <div className="section-stack" style={{ gap: 8 }}>
-              {tasks.map((task, i) => (
-                <div key={i} className="task-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--app-bg)", borderRadius: 4, border: "1px solid var(--border)" }}>
-                  <div style={{ display: "flex", flexDirection: "column" }}>
-                    <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
-                    <span className="muted" style={{ fontSize: 11 }}>Due: {formatDate(task.due)}</span>
+              <div className="section-stack" style={{ gap: 8 }}>
+                {tasks.map((task, i) => (
+                  <div key={i} className="task-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--app-bg)", borderRadius: 4, border: "1px solid var(--border)" }}>
+                    <div style={{ display: "flex", flexDirection: "column" }}>
+                      <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
+                      <span className="muted" style={{ fontSize: 11 }}>Due: {formatDate(task.due)}</span>
+                    </div>
+                    <button type="button" onClick={() => removeTask(i)} className="ghost-button" style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}>
+                      <X size={14} />
+                    </button>
                   </div>
-                  <button type="button" onClick={() => removeTask(i)} className="ghost-button" style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}>
-                    <X size={14} />
+                ))}
+
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
+                  <label className="field">
+                    <span>Goal name</span>
+                    <input className="input" placeholder="e.g. Finish homepage design" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
+                  </label>
+                  <label className="field">
+                    <span>Due date</span>
+                    <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
+                  </label>
+                  <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
+                    <Plus size={16} />
                   </button>
                 </div>
-              ))}
+              </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
-                <label className="field">
-                  <span>Goal name</span>
-                  <input className="input" placeholder="e.g. Finish homepage design" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
-                </label>
-                <label className="field">
-                  <span>Due date</span>
-                  <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
-                </label>
-                <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
-                  <Plus size={16} />
+              {error ? <div className="alert danger">{error}</div> : null}
+
+              <div className="toolbar">
+                <button className="secondary-button" type="button" onClick={onClose}>
+                  Cancel
+                </button>
+                <button className="primary-button" type="submit">
+                  <Plus size={17} />
+                  Create Track
                 </button>
               </div>
-            </div>
-
-            {error ? <div className="alert danger">{error}</div> : null}
-
-            <div className="toolbar">
-              <button className="secondary-button" type="button" onClick={onClose}>
-                Cancel
-              </button>
-              <button className="primary-button" type="submit">
-                <Plus size={17} />
-                Create Track
-              </button>
-            </div>
-          </form>
-        </motion.section>
+            </form>
+          </motion.section>
+        </FocusTrap>
       </motion.div>
     </AnimatePresence>
   );
 }
 
+
+import { ConfirmModal } from "@/components/ui/confirm-modal";
+
 export function DashboardView() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { projects, loading, error, stats, createProject } = useProjectStore();
+  const { projects, loading, error, stats, createProject, deleteProject } = useProjectStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("recent");
   const [modalOpen, setModalOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const addButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  // Return focus to trigger button when modal closes
+  useEffect(() => {
+    if (!modalOpen && mounted) {
+      addButtonRef.current?.focus();
+    }
+  }, [modalOpen, mounted]);
 
   useEffect(() => {
     if (searchParams.get("new")) {
@@ -360,6 +439,17 @@ export function DashboardView() {
       router.replace("/dashboard", { scroll: false });
     }
   }, [searchParams, router]);
+
+  useEffect(() => {
+    const handleGlobalKeys = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === "k") {
+        e.preventDefault();
+        setModalOpen(true);
+      }
+    };
+    window.addEventListener("keydown", handleGlobalKeys);
+    return () => window.removeEventListener("keydown", handleGlobalKeys);
+  }, []);
 
   const filteredProjects = useMemo(() => {
     const nextProjects = projects
@@ -387,6 +477,23 @@ export function DashboardView() {
     [filteredProjects]
   );
 
+  // Return null or a consistent placeholder on server to avoid hydration mismatch
+  if (!mounted) return <div className="page" />;
+
+  if (loading) {
+    return (
+      <div className="page">
+        <div className="premium-dashboard-header" style={{ paddingBottom: 0 }}>
+          <div className="premium-header-top">
+             <div className="skeleton-item" style={{ width: 300, height: 48 }} />
+          </div>
+          <MetricsSkeletons />
+        </div>
+        <ProjectSkeletons />
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <div className="premium-dashboard-header">
@@ -398,9 +505,16 @@ export function DashboardView() {
               <p className="premium-header-subtitle">All your active tracks, deadlines, and streaks in one place.</p>
             </div>
           </div>
-          <button className="premium-new-track-btn solid" type="button" onClick={() => setModalOpen(true)}>
+          <button 
+            ref={addButtonRef}
+            className="premium-new-track-btn solid" 
+            type="button" 
+            onClick={() => setModalOpen(true)} 
+            title="New Track (Ctrl+K)"
+          >
             <Sparkles size={16} />
             New Track
+            <span className="kbd-hint">⌘K</span>
           </button>
         </div>
 
@@ -505,9 +619,7 @@ export function DashboardView() {
         </label>
       </div>
 
-      {loading ? (
-        <ProjectSkeletons />
-      ) : filteredProjects.length ? (
+      {filteredProjects.length ? (
         <div className="section-stack">
           {(["overdue", "late", "active", "completed"] as (keyof typeof grouped)[]).map((status) =>
             grouped[status].length ? (
@@ -521,7 +633,7 @@ export function DashboardView() {
                 </div>
                 <div className="project-grid">
                   {grouped[status].map((project, index) => (
-                    <ProjectCard key={project.id} project={project} index={index} />
+                    <ProjectCard key={project.id} project={project} index={index} deleteProject={deleteProject} />
                   ))}
                 </div>
               </section>
@@ -535,7 +647,21 @@ export function DashboardView() {
         </div>
       )}
 
-      {modalOpen ? <CreateProjectModal onClose={() => setModalOpen(false)} onCreate={createProject} /> : null}
+      {modalOpen && (
+        <CreateProjectModal
+          onClose={() => setModalOpen(false)}
+          onCreate={createProject}
+        />
+      )}
+
+      <ConfirmModal
+        isOpen={!!deleteConfirmId}
+        onClose={() => setDeleteConfirmId(null)}
+        onConfirm={() => deleteConfirmId && deleteProject(deleteConfirmId)}
+        title="Delete Track"
+        description={`Are you sure you want to delete "${projects.find(p => p.id === deleteConfirmId)?.title}"? This action cannot be undone.`}
+        confirmLabel="Delete Track"
+      />
     </div>
   );
 }
