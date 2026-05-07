@@ -14,6 +14,7 @@ type ProjectContextValue = {
   error: string | null;
   stats: { active: number; completed: number; overdue: number; average: number };
   createProject: (input: ProjectInput) => Promise<Project>;
+  deleteProject: (projectId: string) => Promise<void>;
   submitDailyLog: (projectId: string, status: DailyStatus, notes?: string) => Promise<boolean>;
   toggleTask: (projectId: string, taskId: string) => void;
   resetProject: (projectId: string) => void;
