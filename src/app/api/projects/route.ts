@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
-import { Project } from "@/lib/types";
+import { getAuthUser } from "@/lib/auth-utils";
 
 export const dynamic = "force-dynamic";
 
 export async function GET(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
+    const ownerId = await getAuthUser(request);
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
@@ -25,18 +25,23 @@ export async function GET(request: NextRequest) {
   }
 }
 
+import { ProjectSchema, ProjectUpdateSchema } from "@/lib/schemas";
+
 export async function POST(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
+    const ownerId = await getAuthUser(request);
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const text = await request.text();
-    if (!text) {
-      return NextResponse.json({ error: "Missing request body" }, { status: 400 });
+    const body = await request.json();
+    const result = ProjectSchema.safeParse(body);
+    
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid data", details: result.error.format() }, { status: 400 });
     }
-    const project = JSON.parse(text);
+
+    const project = result.data;
     const db = await getDatabase();
     
     // Security: Ensure ownerId matches the authenticated user
@@ -56,16 +61,19 @@ export async function POST(request: NextRequest) {
 
 export async function PUT(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id") || request.headers.get("X-User-Id");
+    const ownerId = await getAuthUser(request);
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const text = await request.text();
-    if (!text) {
-      return NextResponse.json({ error: "Missing request body" }, { status: 400 });
+    const body = await request.json();
+    const result = ProjectUpdateSchema.safeParse(body);
+    
+    if (!result.success) {
+      return NextResponse.json({ error: "Invalid updates", details: result.error.format() }, { status: 400 });
     }
-    const { id, updates } = JSON.parse(text);
+
+    const { id, updates } = result.data;
     const db = await getDatabase();
 
     await db.collection("projects").updateOne(
@@ -82,7 +90,7 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const ownerId = request.headers.get("x-user-id");
+    const ownerId = await getAuthUser(request);
     if (!ownerId) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
