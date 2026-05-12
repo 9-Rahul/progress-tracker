@@ -8,7 +8,7 @@ I built this because I needed a way to track big goals without the clutter of a 
 ## Core Features
 
 - **Tracks (Goals):** Set up a big project, give it a deadline, and a priority level. This is your "North Star."
-- **Honest Progress:** Your progress percentage isn't just about checking boxes. It’s a mix of how many days you've actually worked vs. how many days have passed since you started. It caps at 99%—you only get that last 1% when you manually finalize the project.
+- **Honest Progress:** Your progress percentage is a direct reflection of your consistency. Every time you show up and log work, your score moves forward. Skip a day, and you stall.
 - **Daily Logs:** Every day, you tell the app if you worked on the project, skipped it, or just didn't get to it. You can add notes to explain why.
 - **Focus Mode:** A clean, distraction-free view that only shows what you need to do *today*. No looking at next week’s stress.
 - **Tasks:** Break your tracks down into small, manageable steps. 
@@ -16,7 +16,7 @@ I built this because I needed a way to track big goals without the clutter of a 
 - **Reports:** A dedicated view to see your weekly trends, completion rates, and performance charts. You can even export or print them if you need a paper trail.
 - **Public Share Links:** Want to stay accountable? Generate a public link for any track to show off your execution score, streak, and timeline to the world.
 - **Quick Logging:** You can log your daily progress directly from the dashboard with one click.
-- **Keyboard Shortcuts:** Hit `Ctrl + K` (or `Cmd + K`) from anywhere to quickly start a new track.
+
 
 ## How it works (The Tech)
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
@@ -47,5 +47,3 @@ I built this because I needed a way to track big goals without the clutter of a 
    ```
    Open [http://localhost:3000](http://localhost:3000) and you're good to go.
 
-## Why "Honest Progress"?
-Most apps just count "tasks done / total tasks". But you can finish 10 tasks in one day and then do nothing for two weeks. This app looks at the *time elapsed* since you started. If you aren't logging work daily, your progress won't move much, even if you're checking off small tasks. It's about consistency, not just completion.
