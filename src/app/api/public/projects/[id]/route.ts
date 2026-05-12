@@ -1,30 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCachedPublicProject } from "@/lib/cache-utils";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
-export const revalidate = 0;
 export const runtime = "nodejs";
 
 export async function GET(
-  request: NextRequest,
+  _request: NextRequest,
   props: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { getDatabase } = await import("@/lib/mongodb");
-    const params = await props.params;
-    const id = params.id;
+    const { id } = await props.params;
 
     if (!id) {
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    const db = await getDatabase();
-    
-    // Security: Only fetch if isPublic is true
-    const project = await db.collection("projects").findOne({ 
-      id, 
-      isPublic: true 
-    });
+    const project = await getCachedPublicProject(id);
 
     if (!project) {
       return NextResponse.json({ error: "This track is private or does not exist." }, { status: 404 });
@@ -40,6 +32,10 @@ export async function GET(
       createdAt: project.createdAt,
       logs: project.logs || [],
       tasks: project.tasks || []
+    }, {
+      headers: {
+        'Cache-Control': 'public, s-maxage=3600, stale-while-revalidate=59'
+      }
     });
   } catch (error) {
     console.error("Public API Error:", error);

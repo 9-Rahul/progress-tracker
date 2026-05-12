@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth-utils";
-import { invalidateProjectCache } from "@/lib/projects-cache";
+import { invalidateProjectCache } from "@/lib/cache-utils";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,7 +62,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ message: "Project not found." }, { status: 404 });
     }
 
-    await invalidateProjectCache(ownerId);
+    await invalidateProjectCache(ownerId, id);
     return NextResponse.json({ project: result });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to update project.";
