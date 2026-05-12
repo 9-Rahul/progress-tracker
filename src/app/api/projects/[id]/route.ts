@@ -48,11 +48,11 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     const db = await getDatabase();
     const result = await db.collection("projects").findOneAndUpdate(
-      { id },
+      { id, ownerId },
       {
         $set: {
           ...$set,
-          updatedAt: new Date()
+          updatedAt: new Date().toISOString()
         }
       },
       { returnDocument: "after" }

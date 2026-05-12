@@ -9,7 +9,6 @@ import type { DailyStatus } from "@/lib/types";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
-
 const dayMs = 24 * 60 * 60 * 1000;
 
 function isDailyStatus(value: unknown): value is DailyStatus {
@@ -27,7 +26,6 @@ export async function GET(request: NextRequest) {
     if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
     const projectId = request.nextUrl.searchParams.get("projectId");
-
     const filter: Record<string, string> = { ownerId };
     if (projectId) {
       filter.projectId = projectId;
@@ -39,8 +37,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ logs });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to load logs.";
-    const status = message.includes("MONGODB_URI") ? 503 : 500;
-    return NextResponse.json({ message }, { status });
+    return NextResponse.json({ message }, { status: 500 });
   }
 }
 
@@ -60,7 +57,7 @@ export async function POST(request: NextRequest) {
     }
 
     const db = await getDatabase();
-    const project = await db.collection("projects").findOne({ id: body.projectId, ownerId: body.ownerId });
+    const project = await db.collection("projects").findOne({ id: body.projectId, ownerId });
     if (!project) {
       return NextResponse.json({ message: "Project not found." }, { status: 404 });
     }
@@ -74,7 +71,7 @@ export async function POST(request: NextRequest) {
 
     const log = {
       id: randomUUID(),
-      ownerId: body.ownerId,
+      ownerId,
       projectId: body.projectId,
       date: dateKey(now),
       status: body.status,
@@ -84,7 +81,7 @@ export async function POST(request: NextRequest) {
 
     await db.collection("dailyLogs").insertOne(log);
     await db.collection("projects").updateOne(
-      { id: body.projectId, ownerId: body.ownerId },
+      { id: body.projectId, ownerId },
       {
         $set: {
           progress: nextProgress(Number(project.progress ?? 0), body.status),
