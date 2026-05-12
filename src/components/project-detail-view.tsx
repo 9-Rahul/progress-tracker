@@ -25,9 +25,15 @@ import {
   TrendingUp,
   TriangleAlert,
   X,
-  Plus
+  Plus,
+  Share2,
+  Twitter,
+  Linkedin,
+  Link2,
+  ExternalLink
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { toast } from "sonner";
 import { useProjectStore } from "@/hooks/use-project-store";
 import {
   canSubmitToday,
@@ -94,7 +100,7 @@ function ProjectReport({ project, summary }: { project: Project; summary: any })
             </defs>
             <circle cx="48" cy="48" r="42" fill="none" stroke="var(--green)" strokeWidth="3" opacity="0.2" />
             <circle cx="48" cy="48" r="42" fill="none" stroke="var(--green)" strokeWidth="3"
-              strokeDasharray="263.9" strokeDashoffset={263.9 * (1 - project.progress / 100)}
+              strokeDasharray="263.9" strokeDashoffset={263.9 * (1 - (project.progress || 0) / 100)}
               strokeLinecap="round" transform="rotate(-90 48 48)" filter="url(#pr-glow)" />
           </svg>
           <div className="pr-ring-text">
@@ -280,12 +286,19 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
 }
 
 export function ProjectDetailView({ projectId }: { projectId: string }) {
-  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject } = useProjectStore();
+  const { projects, loading, submitDailyLog, toggleTask, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject, updateProject } = useProjectStore();
   const project = projects.find((item) => item.id === projectId);
   const [selectedLog, setSelectedLog] = useState<DailyLog | null>(null);
   
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDue, setNewTaskDue] = useState("");
+  const [isSharing, setIsSharing] = useState(false);
+
+  const togglePublic = () => {
+    if (!project) return;
+    updateProject(projectId, { isPublic: !project.isPublic });
+    toast.success(project.isPublic ? "Project is now Private" : "Project is now Public");
+  };
 
   const handleAddTask = () => {
     if (newTaskTitle.trim()) {
@@ -301,7 +314,6 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
   const handleReset = async () => {
     if (window.confirm("Are you sure you want to reset this track? This will clear all logs and progress for this track.")) {
       await resetProject(projectId);
-      window.location.reload(); // Harder refresh for detail view to clear all local states
     }
   };
 
@@ -375,6 +387,17 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             <CalendarClock size={14} />
             {project.deadline.startsWith("2099") ? "No Deadline" : formatDate(project.deadline)}
           </span>
+
+          <div className="premium-topbar-divider" />
+
+          <button 
+            className={`premium-topbar-action-btn ${project.isPublic ? "premium-topbar-complete" : "premium-topbar-reset"}`}
+            title={project.isPublic ? "Project is public" : "Project is private"}
+            onClick={togglePublic}
+          >
+            {project.isPublic ? <ExternalLink size={15} strokeWidth={2.5} /> : <Share2 size={15} strokeWidth={2.5} />}
+            {project.isPublic ? "Public" : "Private"}
+          </button>
         </div>
       </header>
 
@@ -418,6 +441,20 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           <p className="metric-value">{summary.completionRate}%</p>
           <p className="metric-note">days I logged progress</p>
         </article>
+        
+        {project.progress === 100 && (
+          <article 
+            className="metric-card" 
+            style={{ border: "1px solid var(--green)", background: "var(--green-soft)", cursor: "pointer" }}
+            onClick={() => setIsSharing(true)}
+          >
+            <p className="metric-label" style={{ color: "var(--green)" }}>
+              Show Off <Share2 size={14} strokeWidth={2.5} />
+            </p>
+            <p className="metric-value" style={{ color: "var(--green)" }}>SHARE</p>
+            <p className="metric-note">get your success card</p>
+          </article>
+        )}
       </motion.section>
 
       <div className="pdv-split-layout">
@@ -642,6 +679,84 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           </section>
         </div>
       </div>
+
+      <AnimatePresence>
+        {isSharing && (
+          <motion.div
+            className="modal-backdrop"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setIsSharing(false)}
+            style={{ zIndex: 100 }}
+          >
+            <motion.div
+              className="success-share-card"
+              onClick={(e) => e.stopPropagation()}
+              initial={{ scale: 0.9, opacity: 0, y: 40 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.9, opacity: 0, y: 40 }}
+              style={{ maxWidth: 500, width: "90%" }}
+            >
+              <div className="share-streak-badge">
+                <Flame size={14} fill="currentColor" />
+                {streakCount(project.logs)} DAY STREAK
+              </div>
+              
+              <h2 className="share-title">{project.title}</h2>
+              <p className="share-subtitle">Track Completed Successfully</p>
+
+              <div className="share-stats">
+                <div className="share-stat-item">
+                  <span className="share-stat-value">{project.progress}%</span>
+                  <span className="share-stat-label">DONE</span>
+                </div>
+                <div className="share-stat-item">
+                  <span className="share-stat-value">{project.logs.length}</span>
+                  <span className="share-stat-label">LOGS</span>
+                </div>
+                <div className="share-stat-item">
+                  <span className="share-stat-value">{summary.completionRate}%</span>
+                  <span className="share-stat-label">CONSISTENCY</span>
+                </div>
+              </div>
+
+              <div className="share-actions">
+                <button className="primary-button btn-twitter" onClick={() => {
+                  const shareUrl = `${window.location.origin}/share/${project.id}`;
+                  const text = `I just finished tracking "${project.title}" with a ${streakCount(project.logs)} day streak on ExecTrack! 🚀\n\nCheck it out: ${shareUrl}\n\n#buildinpublic #productivity`;
+                  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, "_blank");
+                }}>
+                  <Twitter size={18} />
+                  Twitter
+                </button>
+                <button className="primary-button btn-linkedin" onClick={() => {
+                  const shareUrl = `${window.location.origin}/share/${project.id}`;
+                  window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`, "_blank");
+                }}>
+                  <Linkedin size={18} />
+                  LinkedIn
+                </button>
+                <button className="secondary-button btn-copy" onClick={() => {
+                  const shareUrl = `${window.location.origin}/share/${project.id}`;
+                  navigator.clipboard.writeText(shareUrl);
+                  toast.success("Public link copied to clipboard!");
+                }}>
+                  <Link2 size={18} />
+                  Link
+                </button>
+              </div>
+
+              <button 
+                style={{ position: "absolute", top: 20, right: 20, background: "none", border: "none", color: "var(--text-tertiary)", cursor: "pointer" }}
+                onClick={() => setIsSharing(false)}
+              >
+                <X size={20} />
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {selectedLog && (

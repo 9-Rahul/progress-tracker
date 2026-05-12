@@ -3,6 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { dateKey } from "@/lib/progress";
 import { getAuthUser } from "@/lib/auth-utils";
+import { invalidateProjectCache, getCachedLogs, invalidateLogCache } from "@/lib/cache-utils";
 import type { DailyStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -30,9 +31,7 @@ export async function GET(request: NextRequest) {
       filter.projectId = projectId;
     }
 
-    const db = await getDatabase();
-    const logs = await db.collection("dailyLogs").find(filter).sort({ createdAt: -1 }).toArray();
-
+    const logs = await getCachedLogs(ownerId, projectId || undefined);
     return NextResponse.json({ logs });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to load logs.";
@@ -88,6 +87,9 @@ export async function POST(request: NextRequest) {
         }
       }
     );
+
+    await invalidateProjectCache(ownerId, body.projectId);
+    await invalidateLogCache(ownerId, body.projectId);
 
     return NextResponse.json({ log }, { status: 201 });
   } catch (error) {

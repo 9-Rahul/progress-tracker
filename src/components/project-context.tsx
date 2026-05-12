@@ -21,6 +21,7 @@ type ProjectContextValue = {
   finalizeProject: (projectId: string) => void;
   addTaskToProject: (projectId: string, title: string, due: string) => void;
   removeTaskFromProject: (projectId: string, taskId: string) => void;
+  updateProject: (projectId: string, updates: Partial<Project>) => void;
   resetData: () => Promise<void>;
 };
 
@@ -30,7 +31,7 @@ import { firebaseAuth } from "@/lib/firebase";
 
 async function fetchWithUser(url: string, userId: string, options: RequestInit = {}) {
   let token = "";
-  if (firebaseAuth?.currentUser) {
+  if (userId !== "demo-user" && firebaseAuth?.currentUser) {
     try {
       token = await firebaseAuth.currentUser.getIdToken();
     } catch (e) {
@@ -40,10 +41,13 @@ async function fetchWithUser(url: string, userId: string, options: RequestInit =
 
   return fetch(url, {
     ...options,
+    cache: "no-store",
     headers: {
       ...options.headers,
       "Content-Type": "application/json",
       "x-user-id": userId,
+      "Cache-Control": "no-cache, no-store, must-revalidate",
+      "Pragma": "no-cache",
       ...(token ? { Authorization: `Bearer ${token}` } : {})
     }
   });
@@ -139,8 +143,12 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
       onSuccess: () => {
         // Option to add success toast here, or specifically in each mutation
       },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: ["projects", ownerId] });
+      onSettled: async () => {
+        // Force a hard refetch from the server to keep everything in sync
+        await queryClient.invalidateQueries({ 
+          queryKey: ["projects", ownerId],
+          refetchType: 'all'
+        });
       },
     });
   };
@@ -295,6 +303,13 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     });
   }, [updateMutation]);
 
+  const updateProject = useCallback((projectId: string, updates: Partial<Project>) => {
+    updateMutation.mutate({
+      id: projectId,
+      updates: { ...updates, updatedAt: new Date().toISOString() }
+    });
+  }, [updateMutation]);
+
   const resetData = useCallback(async () => {
     await deleteMutation.mutateAsync({ all: true });
   }, [deleteMutation]);
@@ -327,8 +342,9 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     finalizeProject,
     addTaskToProject,
     removeTaskFromProject,
+    updateProject,
     deleteProject
-  }), [projects, isLoading, queryError, stats, createProject, submitDailyLog, toggleTask, resetData, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject, deleteProject]);
+  }), [projects, isLoading, queryError, stats, createProject, submitDailyLog, toggleTask, resetData, resetProject, finalizeProject, addTaskToProject, removeTaskFromProject, updateProject, deleteProject]);
 
   return <ProjectContext.Provider value={value}>{children}</ProjectContext.Provider>;
 }

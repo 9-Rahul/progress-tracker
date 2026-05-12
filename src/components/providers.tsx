@@ -132,6 +132,8 @@ function AuthProvider({ children }: { children: ReactNode }) {
     await syncUser(nextUser);
   };
 
+  const queryClient = useQueryClient();
+
   const value = useMemo<AuthContextValue>(
     () => ({
       user,
@@ -172,38 +174,42 @@ function AuthProvider({ children }: { children: ReactNode }) {
         await syncUser(nextUser, token);
       },
       signOutUser: async () => {
-        setUser(null);
         if (firebaseAuth) {
           await signOut(firebaseAuth);
         }
+        queryClient.clear();
+        setUser(null);
       },
       signInDemo: async () => {
+        queryClient.clear();
         await setDemoSession();
       }
     }),
-    [loading, user]
+    [loading, user, queryClient]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 import { ProjectProvider } from "@/components/project-context";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider, useQueryClient } from "@tanstack/react-query";
 import { Toaster } from "sonner";
 
 export function Providers({ children }: { children: ReactNode }) {
-  return (
-    <QueryClientProvider client={new QueryClient({
-      defaultOptions: {
-        queries: {
-          staleTime: 1000 * 60 * 5, // 5 minutes
-          gcTime: 1000 * 60 * 10, // 10 minutes
-          refetchOnWindowFocus: false, 
-          refetchOnReconnect: "always",
-          retry: 1
-        }
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: 1000 * 60 * 5, // 5 minutes
+        gcTime: 1000 * 60 * 10, // 10 minutes
+        refetchOnWindowFocus: false, 
+        refetchOnReconnect: "always",
+        retry: 1
       }
-    })}>
+    }
+  }));
+
+  return (
+    <QueryClientProvider client={queryClient}>
       <Toaster position="bottom-right" theme="dark" richColors closeButton />
       <ThemeProvider>
         <AuthProvider>
