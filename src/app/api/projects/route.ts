@@ -73,10 +73,14 @@ export async function PUT(request: NextRequest) {
     const { id, updates } = result.data;
     const db = await getDatabase();
 
-    await db.collection("projects").updateOne(
+    const result_db = await db.collection("projects").updateOne(
       { id, ownerId },
       { $set: updates }
     );
+    
+    console.log(`[Update API Debug] Project ${id} update result: matched=${result_db.matchedCount}, modified=${result_db.modifiedCount}`);
+    console.log(`[Update API Debug] Updates sent:`, JSON.stringify(updates));
+
     await invalidateProjectCache(ownerId, id);
 
     return NextResponse.json({ success: true });
