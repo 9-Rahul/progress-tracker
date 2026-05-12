@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       doc,
       { upsert: true }
     );
-    await invalidateProjectCache();
+    await invalidateProjectCache(ownerId);
     return NextResponse.json(doc);
   } catch (error) {
     console.error("Database Error:", error);
@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest) {
       { id, ownerId },
       { $set: updates }
     );
-    await invalidateProjectCache();
+    await invalidateProjectCache(ownerId);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -104,7 +104,7 @@ export async function DELETE(request: NextRequest) {
     } else {
       await db.collection("projects").deleteOne({ id, ownerId });
     }
-    await invalidateProjectCache();
+    await invalidateProjectCache(ownerId);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Database Error:", error);

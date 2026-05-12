@@ -2,6 +2,8 @@ import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { dateKey } from "@/lib/progress";
+import { getAuthUser } from "@/lib/auth-utils";
+import { invalidateProjectCache } from "@/lib/projects-cache";
 import type { DailyStatus } from "@/lib/types";
 
 export const runtime = "nodejs";
@@ -21,14 +23,12 @@ function nextProgress(current: number, status: DailyStatus) {
 
 export async function GET(request: NextRequest) {
   try {
-    const userId = request.nextUrl.searchParams.get("userId");
+    const ownerId = await getAuthUser(request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const projectId = request.nextUrl.searchParams.get("projectId");
 
-    if (!userId) {
-      return NextResponse.json({ message: "userId is required." }, { status: 400 });
-    }
-
-    const filter: Record<string, string> = { ownerId: userId };
+    const filter: Record<string, string> = { ownerId };
     if (projectId) {
       filter.projectId = projectId;
     }
@@ -46,15 +46,17 @@ export async function GET(request: NextRequest) {
 
 export async function POST(request: NextRequest) {
   try {
+    const ownerId = await getAuthUser(request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const body = (await request.json()) as {
-      ownerId?: string;
       projectId?: string;
       status?: DailyStatus;
       notes?: string;
     };
 
-    if (!body.ownerId || !body.projectId || !isDailyStatus(body.status)) {
-      return NextResponse.json({ message: "ownerId, projectId, and status are required." }, { status: 400 });
+    if (!body.projectId || !isDailyStatus(body.status)) {
+      return NextResponse.json({ message: "projectId and status are required." }, { status: 400 });
     }
 
     const db = await getDatabase();
@@ -90,6 +92,8 @@ export async function POST(request: NextRequest) {
         }
       }
     );
+
+    await invalidateProjectCache(ownerId);
 
     return NextResponse.json({ log }, { status: 201 });
   } catch (error) {

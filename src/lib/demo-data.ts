@@ -15,106 +15,70 @@ function log(projectId: string, daysAgo: number, status: DailyLog["status"], not
 
 export function createDemoProjects(ownerId = "demo-user"): Project[] {
   const now = new Date();
+  const todayIso = now.toISOString();
+
   const projects: Project[] = [
     {
-      id: "design-system",
+      id: "starter-saas",
       ownerId,
-      title: "Design System Refresh",
-      description: "Refine tokens, motion rules, and project cards for the next product cycle.",
-      tags: ["UI", "Tokens", "Motion"],
+      title: "🚀 Launch My SaaS",
+      description: "Finalize the MVP and deploy to Vercel. You're almost there!",
+      tags: ["Business", "Build"],
       priority: "high",
-      deadline: dateKey(addDays(now, 28)),
+      deadline: dateKey(addDays(now, 14)),
       status: "active",
-      progress: 68,
-      createdAt: new Date(dateKey(addDays(now, -7))).toISOString(),
-      updatedAt: now.toISOString(),
+      progress: 65,
+      createdAt: new Date(dateKey(addDays(now, -10))).toISOString(),
+      updatedAt: todayIso,
       logs: [
-        log("design-system", 6, "completed", "Finished spacing review."),
-        log("design-system", 5, "working", "Auditing contrast states."),
-        log("design-system", 4, "completed", "Updated card hover motion."),
-        log("design-system", 2, "not_completed", "Blocked on final icons."),
-        log("design-system", 1, "completed", "Prepared component variants."),
-        log("design-system", 0, "working", "Validating dark mode.")
+        log("starter-saas", 5, "completed"),
+        log("starter-saas", 3, "working"),
+        log("starter-saas", 1, "completed"),
+        log("starter-saas", 0, "working")
       ],
       tasks: [
-        { id: "task-tokens", title: "Finalize neutral color tokens", due: dateKey(addDays(now, 0)), done: true },
-        { id: "task-motion", title: "Review micro-interactions", due: dateKey(addDays(now, 0)), done: false },
-        { id: "task-docs", title: "Publish component notes", due: dateKey(addDays(now, 1)), done: false }
+        { id: "st-1-1", title: "Setup MongoDB Atlas", due: todayIso, done: true },
+        { id: "st-1-2", title: "Hardening Backend Security", due: todayIso, done: true },
+        { id: "st-1-3", title: "Final UI Polish", due: dateKey(addDays(now, 2)), done: false },
+        { id: "st-1-4", title: "Production Deployment", due: dateKey(addDays(now, 5)), done: false }
       ]
     },
     {
-      id: "atlas-sync",
+      id: "starter-meditate",
       ownerId,
-      title: "MongoDB Atlas Sync",
-      description: "Ship durable project and daily log persistence with a strict 24-hour cadence.",
-      tags: ["Backend", "Atlas"],
+      title: "🧘 Daily Mindfulness",
+      description: "10 minutes of meditation every morning to stay sharp.",
+      tags: ["Health", "Daily"],
       priority: "medium",
-      deadline: dateKey(addDays(now, 18)),
+      deadline: "2099-12-31",
       status: "active",
-      progress: 42,
+      progress: 30,
       createdAt: new Date(dateKey(addDays(now, -5))).toISOString(),
-      updatedAt: now.toISOString(),
+      updatedAt: todayIso,
       logs: [
-        log("atlas-sync", 5, "working", "Outlined collections."),
-        log("atlas-sync", 4, "completed", "Added API route contract."),
-        log("atlas-sync", 3, "completed", "Validated indexes."),
-        log("atlas-sync", 1, "working", "Testing duplicate log guard.")
+        log("starter-meditate", 2, "completed"),
+        log("starter-meditate", 1, "completed"),
+        log("starter-meditate", 0, "working")
       ],
-      tasks: [
-        { id: "task-indexes", title: "Add compound log indexes", due: dateKey(addDays(now, 0)), done: false },
-        { id: "task-routes", title: "Review API validation", due: dateKey(addDays(now, 0)), done: true },
-        { id: "task-env", title: "Document environment setup", due: dateKey(addDays(now, 2)), done: false }
-      ]
+      tasks: []
     },
     {
-      id: "weekly-reports",
+      id: "starter-read",
       ownerId,
-      title: "Weekly Report Experience",
-      description: "Create clean chart summaries and an export preview that feels print-ready.",
-      tags: ["Reports", "Charts", "Export"],
+      title: "📚 Read 10 Pages",
+      description: "Consistent reading to expand horizons and learn new things.",
+      tags: ["Learning"],
       priority: "low",
-      deadline: dateKey(addDays(now, 54)),
+      deadline: "2099-12-31",
       status: "active",
-      progress: 81,
-      createdAt: new Date(dateKey(addDays(now, -8))).toISOString(),
-      updatedAt: now.toISOString(),
+      progress: 10,
+      createdAt: new Date(dateKey(addDays(now, -2))).toISOString(),
+      updatedAt: todayIso,
       logs: [
-        log("weekly-reports", 6, "completed"),
-        log("weekly-reports", 5, "completed"),
-        log("weekly-reports", 4, "completed"),
-        log("weekly-reports", 3, "working"),
-        log("weekly-reports", 2, "completed"),
-        log("weekly-reports", 1, "completed")
+        log("starter-read", 1, "completed"),
+        log("starter-read", 0, "working")
       ],
-      tasks: [
-        { id: "task-line", title: "Tune weekly line chart", due: dateKey(addDays(now, 0)), done: true },
-        { id: "task-bar", title: "Add completed vs missed bars", due: dateKey(addDays(now, 1)), done: false },
-        { id: "task-preview", title: "Polish PDF preview state", due: dateKey(addDays(now, 2)), done: false }
-      ]
-    },
-    {
-      id: "launch-checklist",
-      ownerId,
-      title: "Launch Readiness",
-      description: "Collect final app checks before the first internal beta.",
-      tags: ["QA", "Launch"],
-      priority: "high",
-      deadline: dateKey(addDays(now, -2)),
-      status: "overdue",
-      progress: 74,
-      createdAt: new Date(dateKey(addDays(now, -11))).toISOString(),
-      updatedAt: now.toISOString(),
-      logs: [
-        log("launch-checklist", 6, "completed"),
-        log("launch-checklist", 4, "working"),
-        log("launch-checklist", 3, "not_completed"),
-        log("launch-checklist", 2, "working")
-      ],
-      tasks: [
-        { id: "task-a11y", title: "Run accessibility pass", due: dateKey(addDays(now, 0)), done: false },
-        { id: "task-build", title: "Verify production build", due: dateKey(addDays(now, 0)), done: false },
-        { id: "task-copy", title: "Review empty states", due: dateKey(addDays(now, 1)), done: true }
-      ]
+      tasks: []
     }
   ];
 
