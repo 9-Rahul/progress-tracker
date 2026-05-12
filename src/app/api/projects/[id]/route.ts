@@ -39,7 +39,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
 
     const { id } = await params;
     const body = (await request.json()) as Record<string, unknown>;
-    const allowed = ["title", "description", "tags", "priority", "deadline", "status", "progress", "tasks"];
+    const allowed = ["title", "description", "tags", "priority", "deadline", "status", "progress", "tasks", "isPublic"];
     const $set = Object.fromEntries(Object.entries(body).filter(([key]) => allowed.includes(key)));
 
     if (!Object.keys($set).length) {

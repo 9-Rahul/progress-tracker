@@ -101,8 +101,8 @@ function ProjectCard({ project, index, deleteProject, submitDailyLog }: { projec
       transition={{ delay: index * 0.04, duration: 0.4 }}
     >
       <div style={{ position: 'relative' }}>
-        <button 
-          className="ghost-button" 
+        <button
+          className="ghost-button"
           style={{ position: 'absolute', top: 12, right: 12, zIndex: 10, color: 'var(--text-muted)', minHeight: 'auto', padding: 6 }}
           onClick={(e) => {
             e.preventDefault();
@@ -113,100 +113,100 @@ function ProjectCard({ project, index, deleteProject, submitDailyLog }: { projec
           <Trash2 size={16} />
         </button>
         <Link className="premium-project-card" href={`/projects/${project.id}`}>
-        <div className="premium-card-content">
-          <div className="premium-top-section">
-            <div className="premium-top-left">
-              <button 
-                className={`premium-status-circle ${project.progress >= 100 ? "checked" : ""}`}
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  submitDailyLog(project.id, "completed");
-                }}
-                title="Quick Log: Done for today!"
-              >
-                <Check size={24} strokeWidth={3} />
-              </button>
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
-                <span className="premium-status-text">
-                  {projectStatusLabel(project.status)}
-                </span>
-                <span className="premium-priority">
-                  <Star size={12} fill="currentColor" className="icon" /> {priorityLabel(project.priority)} Priority
-                </span>
+          <div className="premium-card-content">
+            <div className="premium-top-section">
+              <div className="premium-top-left">
+                <button
+                  className={`premium-status-circle ${project.progress >= 100 ? "checked" : ""}`}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    submitDailyLog(project.id, "completed");
+                  }}
+                  title="Quick Log: Done for today!"
+                >
+                  <Check size={24} strokeWidth={3} />
+                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                  <span className="premium-status-text">
+                    {projectStatusLabel(project.status)}
+                  </span>
+                  <span className="premium-priority">
+                    <Star size={12} fill="currentColor" className="icon" /> {priorityLabel(project.priority)} Priority
+                  </span>
+                </div>
+              </div>
+
+              <div className="premium-dots">
+                <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+                <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+                <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
               </div>
             </div>
-            
-            <div className="premium-dots">
-              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
-              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
-              <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', background: 'currentColor' }}></span>
+
+            <h3 className="premium-title">{project.title}</h3>
+            <p className="premium-subtitle">{project.description}</p>
+
+            <div className="premium-tags">
+              {project.tags.slice(0, 3).map((tag) => (
+                <span className="premium-tag" key={tag}>
+                  {tag.toLowerCase().includes('design') ? <Palette size={14} /> : tag.toLowerCase().includes('sprint') ? <Rocket size={14} /> : null} {tag}
+                </span>
+              ))}
+            </div>
+
+            <div className="premium-divider"></div>
+
+            <div className="premium-footer-card">
+              <div className="premium-footer-left">
+                <div className="premium-calendar-icon">
+                  <CalendarCheck size={20} />
+                </div>
+                <div className="premium-footer-stats">
+                  <span className="premium-no-deadline">
+                    {project.deadline.startsWith("2099") ? "Ongoing" : `Due ${formatDate(project.deadline)}`}
+                  </span>
+                  <span className="premium-missed-count">
+                    {missed ? `${missed} days` : `${streakCount(project.logs)} days`}
+                  </span>
+                  <span className="premium-missed-label">
+                    {missed ? "Pending updates" : "Current streak"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="premium-footer-right">
+                <div className="premium-vertical-divider"></div>
+                <div className="premium-ring-container">
+                  <svg width="56" height="56" viewBox="0 0 56 56">
+                    <defs>
+                      <mask id={`mask-${project.id}`}>
+                        <circle
+                          cx="28" cy="28" r="24" fill="none"
+                          stroke="#fff" strokeWidth="8"
+                          strokeDasharray={2 * Math.PI * 24}
+                          strokeDashoffset={2 * Math.PI * 24 * (1 - project.progress / 100)}
+                          transform="rotate(-90 28 28)"
+                        />
+                      </mask>
+                    </defs>
+                    <circle cx="28" cy="28" r="24" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5" />
+                    <circle
+                      cx="28" cy="28" r="24" fill="none"
+                      strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5"
+                      mask={`url(#mask-${project.id})`}
+                    />
+                    <text x="28" y="26" dominantBaseline="middle" textAnchor="middle" className="premium-ring-value">
+                      {Math.min(100, Math.max(0, project.progress))}
+                    </text>
+                    <text x="28" y="38" dominantBaseline="middle" textAnchor="middle" className="premium-ring-label">
+                      % Done
+                    </text>
+                  </svg>
+                </div>
+              </div>
             </div>
           </div>
-
-          <h3 className="premium-title">{project.title}</h3>
-          <p className="premium-subtitle">{project.description}</p>
-          
-          <div className="premium-tags">
-            {project.tags.slice(0, 3).map((tag) => (
-              <span className="premium-tag" key={tag}>
-                {tag.toLowerCase().includes('design') ? <Palette size={14} /> : tag.toLowerCase().includes('sprint') ? <Rocket size={14} /> : null} {tag}
-              </span>
-            ))}
-          </div>
-
-          <div className="premium-divider"></div>
-
-          <div className="premium-footer-card">
-            <div className="premium-footer-left">
-              <div className="premium-calendar-icon">
-                <CalendarCheck size={20} />
-              </div>
-              <div className="premium-footer-stats">
-                <span className="premium-no-deadline">
-                  {project.deadline.startsWith("2099") ? "Ongoing" : `Due ${formatDate(project.deadline)}`}
-                </span>
-                <span className="premium-missed-count">
-                  {missed ? `${missed} days` : `${streakCount(project.logs)} days`}
-                </span>
-                <span className="premium-missed-label">
-                  {missed ? "Pending updates" : "Current streak"}
-                </span>
-              </div>
-            </div>
-            
-            <div className="premium-footer-right">
-              <div className="premium-vertical-divider"></div>
-              <div className="premium-ring-container">
-                <svg width="56" height="56" viewBox="0 0 56 56">
-                  <defs>
-                    <mask id={`mask-${project.id}`}>
-                      <circle 
-                        cx="28" cy="28" r="24" fill="none" 
-                        stroke="#fff" strokeWidth="8"
-                        strokeDasharray={2 * Math.PI * 24}
-                        strokeDashoffset={2 * Math.PI * 24 * (1 - project.progress / 100)}
-                        transform="rotate(-90 28 28)"
-                      />
-                    </mask>
-                  </defs>
-                  <circle cx="28" cy="28" r="24" fill="none" strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5" />
-                  <circle 
-                    cx="28" cy="28" r="24" fill="none" 
-                    strokeWidth="4" strokeLinecap="round" strokeDasharray="0 10.5" 
-                    mask={`url(#mask-${project.id})`}
-                  />
-                  <text x="28" y="26" dominantBaseline="middle" textAnchor="middle" className="premium-ring-value">
-                    {Math.min(100, Math.max(0, project.progress))}
-                  </text>
-                  <text x="28" y="38" dominantBaseline="middle" textAnchor="middle" className="premium-ring-label">
-                    % Done
-                  </text>
-                </svg>
-              </div>
-            </div>
-          </div>
-        </div>
         </Link>
       </div>
     </motion.div>
@@ -300,13 +300,13 @@ function CreateProjectModal({
             <form className="progress-form" onSubmit={submit}>
               <label className="field">
                 <span>What are you starting?</span>
-                <input 
-                  className="input" 
-                  value={title} 
-                  onChange={(event) => setTitle(event.target.value)} 
-                  required 
+                <input
+                  className="input"
+                  value={title}
+                  onChange={(event) => setTitle(event.target.value)}
+                  required
                   autoFocus
-                  placeholder="e.g. Master React, Daily Gym, Read 50 Books..." 
+                  placeholder="e.g. Master React, Daily Gym, Read 50 Books..."
                 />
               </label>
 
@@ -315,7 +315,7 @@ function CreateProjectModal({
                   <SlidersHorizontal size={14} />
                   Add more details (Optional)
                 </summary>
-                
+
                 <div className="premium-advanced-content">
                   <label className="field" style={{ marginTop: '16px' }}>
                     <span>Description</span>
@@ -478,7 +478,7 @@ export function DashboardView() {
       <div className="page">
         <div className="premium-dashboard-header" style={{ paddingBottom: 0 }}>
           <div className="premium-header-top">
-             <div className="skeleton-item" style={{ width: 300, height: 48 }} />
+            <div className="skeleton-item" style={{ width: 300, height: 48 }} />
           </div>
           <MetricsSkeletons />
         </div>
@@ -498,11 +498,11 @@ export function DashboardView() {
               <p className="premium-header-subtitle">All your active tracks, deadlines, and streaks in one place.</p>
             </div>
           </div>
-          <button 
+          <button
             ref={addButtonRef}
-            className="premium-new-track-btn solid" 
-            type="button" 
-            onClick={() => setModalOpen(true)} 
+            className="premium-new-track-btn solid"
+            type="button"
+            onClick={() => setModalOpen(true)}
             title="New Track (Ctrl+K)"
           >
             <Sparkles size={16} />

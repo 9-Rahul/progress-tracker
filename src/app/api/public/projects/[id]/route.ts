@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getCachedPublicProject } from "@/lib/cache-utils";
+import { getDatabase } from "@/lib/mongodb";
 
 export const dynamic = "force-dynamic";
 export const dynamicParams = true;
@@ -16,12 +16,16 @@ export async function GET(
       return NextResponse.json({ error: "Missing ID" }, { status: 400 });
     }
 
-    const project = await getCachedPublicProject(id);
+    // BYPASS CACHE FOR DEBUGGING
+    const db = await getDatabase();
+    const project = await db.collection("projects").findOne({ id, isPublic: true });
 
     if (!project) {
+      console.log(`[Public API Debug] Project ${id} NOT FOUND in DB with isPublic: true`);
       return NextResponse.json({ error: "This track is private or does not exist." }, { status: 404 });
     }
 
+    console.log(`[Public API Debug] Project ${id} FOUND directly in DB!`);
     return NextResponse.json({
       title: project.title,
       description: project.description,

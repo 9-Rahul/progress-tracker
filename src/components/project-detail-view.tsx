@@ -192,7 +192,10 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
     event.preventDefault();
     setMessage("");
     try {
-      onSubmit(selected, `Topics: ${topics}\nLearned: ${learned}`);
+      const notes = learned.trim() 
+        ? `Topics: ${topics}\nLearned: ${learned}`
+        : `Topics: ${topics}`;
+      onSubmit(selected, notes);
       setTopics("");
       setLearned("");
       setMessage("Progress saved. Your next 24-hour window is now counting down.");
@@ -249,13 +252,12 @@ export function DailyProgressForm({ project, onSubmit }: { project: Project; onS
       </label>
 
       <label className="pdv-field">
-        <span>What did you learn or discover?</span>
+        <span>What did you learn or discover? (Optional)</span>
         <textarea
           className="pdv-textarea"
           value={learned}
           onChange={(e) => setLearned(e.target.value)}
           placeholder="e.g. Learned how to optimize images with Next.js"
-          required
         />
       </label>
 
