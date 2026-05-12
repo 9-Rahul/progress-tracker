@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth-utils";
+import { invalidateUserCache } from "@/lib/cache-utils";
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,6 +23,7 @@ export async function POST(request: NextRequest) {
       { $set: { name, email, avatar, updatedAt: new Date().toISOString() } },
       { upsert: true }
     );
+    await invalidateUserCache(ownerId);
 
     return NextResponse.json({ success: true });
   } catch (error) {

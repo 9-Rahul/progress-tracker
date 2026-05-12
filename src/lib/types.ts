@@ -32,6 +32,7 @@ export type Project = {
   progress: number;
   createdAt: string;
   updatedAt: string;
+  isPublic?: boolean;
   logs: DailyLog[];
   tasks: ProjectTask[];
 };
