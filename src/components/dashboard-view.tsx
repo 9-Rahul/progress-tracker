@@ -641,7 +641,7 @@ export function DashboardView() {
           <h3>Your journey starts here</h3>
           <p>No tracks here yet. Ready to make some progress?</p>
           <button className="primary-button" onClick={() => setModalOpen(true)} style={{ marginTop: '16px' }}>
-            <Plus size={18} />
+            <Plus size={25} />
             Create Your First Track
           </button>
         </div>
