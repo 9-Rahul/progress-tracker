@@ -20,7 +20,8 @@ I built this because I needed a way to track big goals without the clutter of a 
 
 ## How it works (The Tech)
 - **Framework:** [Next.js](https://nextjs.org/) (App Router)
-- **Database & Auth:** [Firebase](https://firebase.google.com/) for keeping your data synced and secure.
+- **Database:** [MongoDB](https://www.mongodb.com/) for fast, flexible project data storage.
+- **Auth:** [Firebase](https://firebase.google.com/) for secure user authentication and session management.
 - **State Management:** [TanStack Query](https://tanstack.com/query/latest) (React Query) for snappy, optimistic UI updates.
 - **Icons:** [Lucide](https://lucide.dev/) for the clean visual language.
 - **Styling:** Custom CSS with a focus on glassmorphism and a premium dark mode feel.
