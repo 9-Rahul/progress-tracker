@@ -31,7 +31,7 @@ import { firebaseAuth } from "@/lib/firebase";
 
 async function fetchWithUser(url: string, userId: string, options: RequestInit = {}) {
   let token = "";
-  if (firebaseAuth?.currentUser) {
+  if (userId !== "demo-user" && firebaseAuth?.currentUser) {
     try {
       token = await firebaseAuth.currentUser.getIdToken();
     } catch (e) {

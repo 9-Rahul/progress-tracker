@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
 import { getAuthUser } from "@/lib/auth-utils";
-import { getCachedProjects, invalidateProjectCache } from "@/lib/projects-cache";
+import { getCachedProjects, invalidateProjectCache } from "@/lib/cache-utils";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +48,7 @@ export async function POST(request: NextRequest) {
       doc,
       { upsert: true }
     );
-    await invalidateProjectCache(ownerId);
+    await invalidateProjectCache(ownerId, project.id);
     return NextResponse.json(doc);
   } catch (error) {
     console.error("Database Error:", error);
@@ -77,7 +77,7 @@ export async function PUT(request: NextRequest) {
       { id, ownerId },
       { $set: updates }
     );
-    await invalidateProjectCache(ownerId);
+    await invalidateProjectCache(ownerId, id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -104,7 +104,7 @@ export async function DELETE(request: NextRequest) {
     } else {
       await db.collection("projects").deleteOne({ id, ownerId });
     }
-    await invalidateProjectCache(ownerId);
+    await invalidateProjectCache(ownerId, id || undefined);
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Database Error:", error);
