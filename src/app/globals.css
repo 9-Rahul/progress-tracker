@@ -1103,7 +1103,7 @@ a:hover {
   background: var(--surface-hover);
 }
 
-.empty-state svg {
+.empty-state-icon svg {
   color: var(--text-tertiary);
   width: 48px;
   height: 48px;
