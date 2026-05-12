@@ -28,6 +28,7 @@ export const ProjectSchema = z.object({
   progress: z.number().min(0).max(100),
   createdAt: z.string(),
   updatedAt: z.string(),
+  isPublic: z.boolean().optional(),
   logs: z.array(LogSchema),
   tasks: z.array(TaskSchema),
 });

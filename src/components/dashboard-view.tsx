@@ -91,7 +91,7 @@ function priorityLabel(priority: Priority) {
   return priority.charAt(0).toUpperCase() + priority.slice(1);
 }
 
-function ProjectCard({ project, index, deleteProject }: { project: Project; index: number; deleteProject: (id: string) => void }) {
+function ProjectCard({ project, index, deleteProject, submitDailyLog }: { project: Project; index: number; deleteProject: (id: string) => void; submitDailyLog: (id: string, status: any) => Promise<boolean> }) {
   const missed = missedDays(project).length;
 
   return (
@@ -116,9 +116,17 @@ function ProjectCard({ project, index, deleteProject }: { project: Project; inde
         <div className="premium-card-content">
           <div className="premium-top-section">
             <div className="premium-top-left">
-              <div className="premium-status-circle">
+              <button 
+                className={`premium-status-circle ${project.progress >= 100 ? "checked" : ""}`}
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  submitDailyLog(project.id, "completed");
+                }}
+                title="Quick Log: Done for today!"
+              >
                 <Check size={24} strokeWidth={3} />
-              </div>
+              </button>
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
                 <span className="premium-status-text">
                   {projectStatusLabel(project.status)}
@@ -291,113 +299,98 @@ function CreateProjectModal({
 
             <form className="progress-form" onSubmit={submit}>
               <label className="field">
-                <span>Title</span>
-                <input className="input" value={title} onChange={(event) => setTitle(event.target.value)} required placeholder="e.g. Learn React, Ship landing page" />
-              </label>
-
-              <label className="field">
-                <span>Description</span>
-                <textarea
-                  className="textarea"
-                  value={description}
-                  onChange={(event) => setDescription(event.target.value)}
-                  required
-                  placeholder="Describe what you want to achieve…"
+                <span>What are you starting?</span>
+                <input 
+                  className="input" 
+                  value={title} 
+                  onChange={(event) => setTitle(event.target.value)} 
+                  required 
+                  autoFocus
+                  placeholder="e.g. Master React, Daily Gym, Read 50 Books..." 
                 />
               </label>
 
-              <div className="field-grid">
-                <label className="field">
-                  <span>Tags</span>
-                  <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Backend" />
-                </label>
+              <details className="premium-advanced-details">
+                <summary className="premium-advanced-summary">
+                  <SlidersHorizontal size={14} />
+                  Add more details (Optional)
+                </summary>
+                
+                <div className="premium-advanced-content">
+                  <label className="field" style={{ marginTop: '16px' }}>
+                    <span>Description</span>
+                    <textarea
+                      className="textarea"
+                      value={description}
+                      onChange={(event) => setDescription(event.target.value)}
+                      placeholder="Why are you doing this? What's the end goal?"
+                      rows={2}
+                    />
+                  </label>
 
-                <label className="field">
-                  <span>Priority</span>
-                  <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
-                    <option value="low">Low</option>
-                    <option value="medium">Medium</option>
-                    <option value="high">High</option>
-                  </select>
-                </label>
-              </div>
+                  <div className="field-grid">
+                    <label className="field">
+                      <span>Tags</span>
+                      <input className="input" value={tags} onChange={(event) => setTags(event.target.value)} placeholder="Design, Health" />
+                    </label>
 
-              <div className="field">
-                <span>How long is this track?</span>
-                <select
-                  className="select"
-                  onChange={(e) => {
-                    const days = parseInt(e.target.value);
-                    if (days > 0) {
-                      setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
-                      setHasDeadline(true);
-                    }
-                  }}
-                >
-                  <option value="0">I&apos;ll set a custom date</option>
-                  {Array.from({ length: 30 }, (_, i) => i + 1).map(days => (
-                    <option key={days} value={days}>{days} Day{days > 1 ? 's' : ''}</option>
-                  ))}
-                </select>
-              </div>
-
-              <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={!hasDeadline}
-                  onChange={(e) => setHasDeadline(!e.target.checked)}
-                  style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
-                />
-                <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>No end date (ongoing)</span>
-              </label>
-
-              {hasDeadline && (
-                <label className="field">
-                  <span>Pick an end date</span>
-                  <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} required />
-                </label>
-              )}
-
-              <div className="section-divider" />
-              <p className="eyebrow">Goals &amp; Checkpoints</p>
-
-              <div className="section-stack" style={{ gap: 8 }}>
-                {tasks.map((task, i) => (
-                  <div key={i} className="task-row" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "8px 12px", background: "var(--app-bg)", borderRadius: 4, border: "1px solid var(--border)" }}>
-                    <div style={{ display: "flex", flexDirection: "column" }}>
-                      <span style={{ fontWeight: 600, fontSize: 13 }}>{task.title}</span>
-                      <span className="muted" style={{ fontSize: 11 }}>Due: {formatDate(task.due)}</span>
-                    </div>
-                    <button type="button" onClick={() => removeTask(i)} className="ghost-button" style={{ color: "var(--red)", minHeight: "auto", padding: 4 }}>
-                      <X size={14} />
-                    </button>
+                    <label className="field">
+                      <span>Priority</span>
+                      <select className="select" value={priority} onChange={(event) => setPriority(event.target.value as Priority)}>
+                        <option value="low">Low</option>
+                        <option value="medium">Medium</option>
+                        <option value="high">High</option>
+                      </select>
+                    </label>
                   </div>
-                ))}
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 140px auto", alignItems: "flex-end", gap: 12 }}>
-                  <label className="field">
-                    <span>Goal name</span>
-                    <input className="input" placeholder="e.g. Finish homepage design" value={newTaskTitle} onChange={e => setNewTaskTitle(e.target.value)} onKeyDown={e => e.key === 'Enter' && (e.preventDefault(), addTask())} />
+                  <div className="field">
+                    <span>How long is this track?</span>
+                    <select
+                      className="select"
+                      onChange={(e) => {
+                        const days = parseInt(e.target.value);
+                        if (days > 0) {
+                          setDeadline(addDays(new Date(), days).toISOString().slice(0, 10));
+                          setHasDeadline(true);
+                        }
+                      }}
+                    >
+                      <option value="0">I&apos;ll set a custom date</option>
+                      <option value="7">1 Week</option>
+                      <option value="30">30 Days</option>
+                      <option value="90">90 Days</option>
+                    </select>
+                  </div>
+
+                  <label className="field" style={{ flexDirection: "row", alignItems: "center", gap: 10, cursor: "pointer" }}>
+                    <input
+                      type="checkbox"
+                      checked={!hasDeadline}
+                      onChange={(e) => setHasDeadline(!e.target.checked)}
+                      style={{ width: 16, height: 16, accentColor: "var(--accent)" }}
+                    />
+                    <span style={{ fontWeight: 500, color: "var(--text-primary)" }}>Ongoing (No end date)</span>
                   </label>
-                  <label className="field">
-                    <span>Due date</span>
-                    <input className="input" type="date" value={newTaskDue} onChange={e => setNewTaskDue(e.target.value)} />
-                  </label>
-                  <button type="button" className="secondary-button" onClick={addTask} style={{ height: 38, padding: "0 16px" }} title="Add Milestone">
-                    <Plus size={16} />
-                  </button>
+
+                  {hasDeadline && (
+                    <label className="field">
+                      <span>Target End Date</span>
+                      <input className="input" type="date" value={deadline} min={new Date().toISOString().slice(0, 10)} max={oneYearFromToday()} onChange={(event) => setDeadline(event.target.value)} />
+                    </label>
+                  )}
                 </div>
-              </div>
+              </details>
 
               {error ? <div className="alert danger">{error}</div> : null}
 
-              <div className="toolbar">
+              <div className="toolbar" style={{ marginTop: '24px' }}>
                 <button className="secondary-button" type="button" onClick={onClose}>
                   Cancel
                 </button>
                 <button className="primary-button" type="submit">
-                  <Plus size={17} />
-                  Create Track
+                  <Rocket size={17} />
+                  Start Tracking
                 </button>
               </div>
             </form>
@@ -414,7 +407,7 @@ import { ConfirmModal } from "@/components/ui/confirm-modal";
 export function DashboardView() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { projects, loading, error, stats, createProject, deleteProject } = useProjectStore();
+  const { projects, loading, error, stats, createProject, deleteProject, submitDailyLog } = useProjectStore();
   const [filter, setFilter] = useState<Filter>("all");
   const [sort, setSort] = useState<Sort>("recent");
   const [modalOpen, setModalOpen] = useState(false);
@@ -633,7 +626,7 @@ export function DashboardView() {
                 </div>
                 <div className="project-grid">
                   {grouped[status].map((project, index) => (
-                    <ProjectCard key={project.id} project={project} index={index} deleteProject={setDeleteConfirmId} />
+                    <ProjectCard key={project.id} project={project} index={index} deleteProject={setDeleteConfirmId} submitDailyLog={submitDailyLog} />
                   ))}
                 </div>
               </section>
@@ -642,8 +635,15 @@ export function DashboardView() {
         </div>
       ) : (
         <div className="empty-state">
-          <FolderKanban strokeWidth={1.5} />
-          <span>No tracks here yet. Create one to get started!</span>
+          <div className="empty-state-icon">
+            <Rocket size={48} strokeWidth={1.5} />
+          </div>
+          <h3>Your journey starts here</h3>
+          <p>No tracks here yet. Ready to make some progress?</p>
+          <button className="primary-button" onClick={() => setModalOpen(true)} style={{ marginTop: '16px' }}>
+            <Plus size={18} />
+            Create Your First Track
+          </button>
         </div>
       )}
 

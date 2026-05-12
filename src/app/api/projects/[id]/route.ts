@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDatabase } from "@/lib/mongodb";
+import { getAuthUser } from "@/lib/auth-utils";
+import { invalidateProjectCache } from "@/lib/projects-cache";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -10,9 +12,12 @@ type RouteContext = {
 
 export async function GET(_request: NextRequest, { params }: RouteContext) {
   try {
+    const ownerId = await getAuthUser(_request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { id } = await params;
     const db = await getDatabase();
-    const project = await db.collection("projects").findOne({ id });
+    const project = await db.collection("projects").findOne({ id, ownerId });
 
     if (!project) {
       return NextResponse.json({ message: "Project not found." }, { status: 404 });
@@ -29,6 +34,9 @@ export async function GET(_request: NextRequest, { params }: RouteContext) {
 
 export async function PATCH(request: NextRequest, { params }: RouteContext) {
   try {
+    const ownerId = await getAuthUser(request);
+    if (!ownerId) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
     const { id } = await params;
     const body = (await request.json()) as Record<string, unknown>;
     const allowed = ["title", "description", "tags", "priority", "deadline", "status", "progress", "tasks"];
@@ -54,6 +62,7 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ message: "Project not found." }, { status: 404 });
     }
 
+    await invalidateProjectCache(ownerId);
     return NextResponse.json({ project: result });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Unable to update project.";
