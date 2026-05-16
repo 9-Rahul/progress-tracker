@@ -1,33 +1,28 @@
 import { NextRequest } from "next/server";
 import { adminAuth } from "./firebase-admin";
 
-/**
- * Extracts and verifies the ownerId from the request headers using Firebase Admin.
- * This is the "Gold Standard" for SaaS security.
- */
-// Simple in-memory cache for verified tokens to speed up repeated requests
 const verificationCache = new Map<string, { uid: string; expires: number }>();
-const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const CACHE_TTL = 5 * 60 * 1000;
 
 export async function getAuthUser(request: NextRequest): Promise<string | null> {
   const authHeader = request.headers.get("Authorization");
 
   if (authHeader?.startsWith("Bearer ")) {
     const token = authHeader.substring(7);
-    
+
     // Check cache first
     const cached = verificationCache.get(token);
     if (cached && cached.expires > Date.now()) {
       return cached.uid;
     }
-    
+
     try {
       const decoded = await adminAuth.verifyIdToken(token);
-      
+
       // Store in cache
-      verificationCache.set(token, { 
-        uid: decoded.uid, 
-        expires: Date.now() + CACHE_TTL 
+      verificationCache.set(token, {
+        uid: decoded.uid,
+        expires: Date.now() + CACHE_TTL
       });
 
       // Cleanup old cache entries occasionally

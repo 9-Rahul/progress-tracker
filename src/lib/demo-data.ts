@@ -36,12 +36,7 @@ export function createDemoProjects(ownerId = "demo-user"): Project[] {
         log("starter-saas", 1, "completed"),
         log("starter-saas", 0, "working")
       ],
-      tasks: [
-        { id: "st-1-1", title: "Setup MongoDB Atlas", due: todayIso, done: true },
-        { id: "st-1-2", title: "Hardening Backend Security", due: todayIso, done: true },
-        { id: "st-1-3", title: "Final UI Polish", due: dateKey(addDays(now, 2)), done: false },
-        { id: "st-1-4", title: "Production Deployment", due: dateKey(addDays(now, 5)), done: false }
-      ]
+      tasks: []
     },
     {
       id: "starter-meditate",
