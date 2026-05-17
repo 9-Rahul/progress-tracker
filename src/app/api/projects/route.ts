@@ -40,6 +40,21 @@ export async function POST(request: NextRequest) {
     const project = result.data;
     const db = await getDatabase();
     
+    // Demo User Abuse Prevention
+    if (ownerId === "demo-user") {
+      if (project.tasks && project.tasks.length > 5) {
+        return NextResponse.json({ error: "Demo users can only add up to 5 goals per track." }, { status: 403 });
+      }
+      
+      const existing = await db.collection("projects").findOne({ id: project.id, ownerId });
+      if (!existing) {
+        const count = await db.collection("projects").countDocuments({ ownerId });
+        if (count >= 5) {
+          return NextResponse.json({ error: "Demo accounts are limited to 5 tracks max. Please sign up to create more!" }, { status: 403 });
+        }
+      }
+    }
+    
     // Security: Ensure ownerId matches the authenticated user
     const doc = { ...project, ownerId };
     
@@ -71,6 +86,12 @@ export async function PUT(request: NextRequest) {
     }
 
     const { id, updates } = result.data;
+    
+    // Demo User Abuse Prevention
+    if (ownerId === "demo-user" && updates.tasks && updates.tasks.length > 5) {
+      return NextResponse.json({ error: "Demo users can only add up to 5 goals per track." }, { status: 403 });
+    }
+
     const db = await getDatabase();
 
     const result_db = await db.collection("projects").updateOne(

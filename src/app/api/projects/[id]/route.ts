@@ -46,6 +46,10 @@ export async function PATCH(request: NextRequest, { params }: RouteContext) {
       return NextResponse.json({ message: "No supported fields were provided." }, { status: 400 });
     }
 
+    if (ownerId === "demo-user" && $set.tasks && Array.isArray($set.tasks) && $set.tasks.length > 5) {
+      return NextResponse.json({ message: "Demo users can only add up to 5 goals per track." }, { status: 403 });
+    }
+
     const db = await getDatabase();
     const result = await db.collection("projects").findOneAndUpdate(
       { id, ownerId },

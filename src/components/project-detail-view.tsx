@@ -51,6 +51,7 @@ import {
 import type { DailyLog, DailyStatus, Project } from "@/lib/types";
 import { BarChart, LineChart } from "@/components/ui/charts";
 import { ProgressRing } from "@/components/ui/progress-ring";
+import { ConfirmModal } from "@/components/ui/confirm-modal";
 
 const statusOptions: { value: DailyStatus; title: string; detail: string; icon: LucideIcon }[] = [
   { value: "completed", title: "Done for today", detail: "Everything went as planned. Great work!", icon: CheckCircle2 },
@@ -296,6 +297,10 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
   const [newTaskDue, setNewTaskDue] = useState("");
   const [isSharing, setIsSharing] = useState(false);
 
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isCompleteModalOpen, setIsCompleteModalOpen] = useState(false);
+  const [taskToRemove, setTaskToRemove] = useState<string | null>(null);
+
   const togglePublic = () => {
     if (!project) return;
     updateProject(projectId, { isPublic: !project.isPublic });
@@ -314,9 +319,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
   const missed = useMemo(() => (project ? missedDays(project).slice(-7) : []), [project]);
 
   const handleReset = async () => {
-    if (window.confirm("Are you sure you want to reset this track? This will clear all logs and progress for this track.")) {
-      await resetProject(projectId);
-    }
+    setIsResetModalOpen(true);
   };
 
   if (loading) {
@@ -362,9 +365,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
         <div className="premium-topbar-right">
           {project.progress < 100 && (
             <button className="premium-topbar-action-btn premium-topbar-complete" type="button" onClick={() => {
-              if (window.confirm("Mark this track as complete? This will set progress to 100% and lock it.")) {
-                finalizeProject(project.id);
-              }
+              setIsCompleteModalOpen(true);
             }}>
               <CheckCircle2 size={15} strokeWidth={2.5} />
               Mark Complete
@@ -557,7 +558,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
                   </span>
                   <button
                     type="button"
-                    onClick={(e) => { e.stopPropagation(); if (window.confirm("Remove this goal from the list?")) removeTaskFromProject(project.id, task.id); }}
+                    onClick={(e) => { e.stopPropagation(); setTaskToRemove(task.id); }}
                     className="pdv-task-delete"
                     title="Remove goal"
                   >
@@ -819,6 +820,38 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <ConfirmModal
+        isOpen={isResetModalOpen}
+        onClose={() => setIsResetModalOpen(false)}
+        onConfirm={() => resetProject(projectId)}
+        title="Reset Track"
+        description="Are you sure you want to reset this track? This will clear all logs and progress for this track."
+        confirmLabel="Reset Track"
+        variant="danger"
+      />
+
+      <ConfirmModal
+        isOpen={isCompleteModalOpen}
+        onClose={() => setIsCompleteModalOpen(false)}
+        onConfirm={() => finalizeProject(project.id)}
+        title="Complete Track"
+        description="Mark this track as complete? This will set progress to 100% and lock it."
+        confirmLabel="Mark Complete"
+        variant="info"
+      />
+
+      <ConfirmModal
+        isOpen={taskToRemove !== null}
+        onClose={() => setTaskToRemove(null)}
+        onConfirm={() => {
+          if (taskToRemove) removeTaskFromProject(project.id, taskToRemove);
+        }}
+        title="Remove Goal"
+        description="Are you sure you want to remove this goal from the list?"
+        confirmLabel="Remove"
+        variant="danger"
+      />
     </div>
   );
 }

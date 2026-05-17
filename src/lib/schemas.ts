@@ -21,7 +21,7 @@ export const ProjectSchema = z.object({
   ownerId: z.string().optional(),
   title: z.string().min(1).max(100),
   description: z.string().max(500),
-  tags: z.array(z.string()),
+  tags: z.array(z.string().max(50)).max(20),
   priority: z.enum(["low", "medium", "high"]),
   deadline: z.string(),
   status: z.enum(["active", "completed", "overdue", "late"]),
@@ -29,8 +29,8 @@ export const ProjectSchema = z.object({
   createdAt: z.string(),
   updatedAt: z.string(),
   isPublic: z.boolean().optional(),
-  logs: z.array(LogSchema),
-  tasks: z.array(TaskSchema),
+  logs: z.array(LogSchema).max(5000),
+  tasks: z.array(TaskSchema).max(500),
 });
 
 export const ProjectUpdateSchema = z.object({

@@ -227,7 +227,7 @@ function CreateProjectModal({
   const [priority, setPriority] = useState<Priority>("medium");
   const [deadline, setDeadline] = useState(() => addDays(new Date(), 14).toISOString().slice(0, 10));
   const [hasDeadline, setHasDeadline] = useState(true);
-  const [error, setError] = useState("");
+
   const [tasks, setTasks] = useState<{ title: string; due: string }[]>([]);
   const [newTaskTitle, setNewTaskTitle] = useState("");
   const [newTaskDue, setNewTaskDue] = useState(() => addDays(new Date(), 7).toISOString().slice(0, 10));
@@ -244,7 +244,7 @@ function CreateProjectModal({
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setError("");
+
 
     try {
       const project = await onCreate({
@@ -261,7 +261,7 @@ function CreateProjectModal({
       onClose();
       router.push(`/projects/${project.id}`);
     } catch (createError) {
-      setError(createError instanceof Error ? createError.message : "Unable to create project.");
+      // Error is handled globally via project-context mutations (which show the toast popup)
     }
   };
 
@@ -382,7 +382,6 @@ function CreateProjectModal({
                 </div>
               </details>
 
-              {error ? <div className="alert danger">{error}</div> : null}
 
               <div className="toolbar" style={{ marginTop: '24px' }}>
                 <button className="secondary-button" type="button" onClick={onClose}>
@@ -505,9 +504,8 @@ export function DashboardView() {
             onClick={() => setModalOpen(true)}
             title="New Track (Ctrl+K)"
           >
-            <Sparkles size={16} />
+            <Plus size={16} strokeWidth={2.5} />
             New Track
-            <span className="kbd-hint">⌘K</span>
           </button>
         </div>
 

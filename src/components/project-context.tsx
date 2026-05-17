@@ -160,7 +160,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         method: "POST",
         body: JSON.stringify(project)
       });
-      if (!response.ok) throw new Error("Failed to create project");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || "Failed to create project");
+      }
       return response.json();
     },
     (old, project) => [project, ...old]
@@ -172,7 +175,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
         method: "PUT",
         body: JSON.stringify({ id, updates })
       });
-      if (!response.ok) throw new Error("Failed to update project");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || "Failed to update project");
+      }
       return response.json();
     },
     (old, { id, updates }) => old.map(p => p.id === id ? { ...p, ...updates } : p)
@@ -182,7 +188,10 @@ export function ProjectProvider({ children }: { children: ReactNode }) {
     async ({ id, all }) => {
       const url = all ? "/api/projects?all=true" : `/api/projects?id=${id}`;
       const response = await fetchWithUser(url, ownerId, { method: "DELETE" });
-      if (!response.ok) throw new Error("Failed to delete track");
+      if (!response.ok) {
+        const errData = await response.json().catch(() => ({}));
+        throw new Error(errData.error || errData.message || "Failed to delete track");
+      }
     },
     (old, { id, all }) => (all ? [] : old.filter((p) => p.id !== id))
   );
