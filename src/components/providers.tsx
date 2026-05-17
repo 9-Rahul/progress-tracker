@@ -90,6 +90,7 @@ async function syncUser(user: AuthUser, token?: string) {
       method: "POST",
       headers: { 
         "Content-Type": "application/json",
+        "x-user-id": user.id,
         ...(token ? { Authorization: `Bearer ${token}` } : {})
       },
       body: JSON.stringify({
