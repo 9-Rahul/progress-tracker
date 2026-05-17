@@ -2,15 +2,18 @@ import { getApps, initializeApp } from "firebase/app";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyBog_hsuS5Nj3-DMbpl26WxPfdL_JxVSVA",
-  authDomain: "progress-tracker-2.firebaseapp.com",
-  projectId: "progress-tracker-2",
-  storageBucket: "progress-tracker-2.firebasestorage.app",
-  messagingSenderId: "609257316249",
-  appId: "1:609257316249:web:f0ec41aa35cf526843bd08"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID
 };
 
-export const isFirebaseConfigured = true;
+export const isFirebaseConfigured = Boolean(
+  process.env.NEXT_PUBLIC_FIREBASE_API_KEY &&
+  process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID
+);
 
 export const firebaseApp = isFirebaseConfigured
   ? getApps().length
