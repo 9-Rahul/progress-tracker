@@ -28,6 +28,7 @@ if (!admin.apps.length) {
     if (serviceAccount) {
       admin.initializeApp({
         credential: admin.credential.cert(serviceAccount),
+        projectId: serviceAccount.project_id,
       });
     } else {
       admin.initializeApp();
