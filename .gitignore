@@ -28,6 +28,12 @@ yarn-error.log*
 .env*.local
 .env
 
+# service account credentials — NEVER commit these
+service-account.json
+*-service-account.json
+*-credentials.json
+firebase-adminsdk*.json
+
 # vercel
 .vercel
 
