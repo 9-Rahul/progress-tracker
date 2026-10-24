@@ -2147,3 +2147,56 @@
 .premium-project-card:hover * {
   text-decoration: none !important;
 }
+
+/* ============================================================
+   WELCOME MICRO-BANNER FOR FIRST-TIME VIEWERS
+   ============================================================ */
+
+.apple-welcome-banner {
+  background: rgba(187, 244, 61, 0.05);
+  border: 1px solid rgba(187, 244, 61, 0.2);
+  border-radius: 14px;
+  padding: 12px 16px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.apple-welcome-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #e4e4e7;
+  line-height: 1.4;
+}
+
+.apple-welcome-banner-left strong {
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.apple-welcome-banner-left span {
+  color: #a1a1aa;
+}
+
+.apple-welcome-banner-close {
+  background: transparent;
+  border: none;
+  color: #7e7e88;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+  flex-shrink: 0;
+}
+
+.apple-welcome-banner-close:hover {
+  color: #ffffff;
+}
+

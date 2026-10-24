@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Download, FileText, Printer, TrendingUp, CheckCircle2, AlertCircle } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
@@ -179,9 +180,12 @@ export function ReportsView() {
         <div className="apple-card" style={{ padding: 48, textAlign: "center" }}>
           <FileText size={32} style={{ color: "var(--apple-text-tertiary)", margin: "0 auto 12px" }} />
           <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--apple-text-primary)", margin: 0 }}>No report data</h2>
-          <p style={{ fontSize: 13, color: "var(--apple-text-secondary)", marginTop: 4 }}>
+          <p style={{ fontSize: 13, color: "var(--apple-text-secondary)", margin: "6px 0 18px" }}>
             Create a track and log progress to generate your execution reports.
           </p>
+          <Link href="/dashboard?new=true" className="lime-btn-primary" style={{ display: "inline-flex" }}>
+            <span>Create Track</span>
+          </Link>
         </div>
       )}
     </div>

@@ -30,7 +30,8 @@ import {
   Linkedin,
   Link2,
   ExternalLink,
-  Target
+  Target,
+  HelpCircle
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { toast } from "sonner";
@@ -346,7 +347,13 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
       <section className="apple-activity-hero">
         <div className="apple-metric-card apple-score-hero-card">
           <div className="apple-metric-card-top">
-            <span>Execution Score</span>
+            <span
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "help" }}
+              title="Execution Score: Reflects your daily check-in streak and milestone completion rate. Missed days decrease score."
+            >
+              <span>Execution Score</span>
+              <HelpCircle size={12} color="#7e7e88" />
+            </span>
             <Target size={15} style={{ color: "#bbf43d" }} />
           </div>
           <div className="apple-score-card-body">

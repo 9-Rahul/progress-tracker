@@ -155,10 +155,10 @@ export function AuthCard() {
               SECURE WORKSPACE
             </span>
             <h2 className="apple-auth-panel-title">
-              {mode === "login" ? "Welcome back" : "Create your account"}
+              {mode === "login" ? "Enter Workspace" : "Create your account"}
             </h2>
             <p className="apple-auth-panel-sub">
-              {mode === "login" ? "Sign in to continue tracking your goals." : "Start building your execution streak today."}
+              {mode === "login" ? "Sign in or launch instant demo to continue." : "Start building your execution streak today."}
             </p>
           </div>
 

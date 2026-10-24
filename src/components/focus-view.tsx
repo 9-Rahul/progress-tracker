@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { Bell, Check, Clock3, Focus, Sparkles } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
@@ -153,9 +154,12 @@ export function FocusView() {
         <div className="apple-card" style={{ padding: 48, textAlign: "center" }}>
           <Focus size={32} style={{ color: "var(--apple-text-tertiary)", margin: "0 auto 12px" }} />
           <h2 style={{ fontSize: 16, fontWeight: 600, color: "var(--apple-text-primary)", margin: 0 }}>No active tracks</h2>
-          <p style={{ fontSize: 13, color: "var(--apple-text-secondary)", marginTop: 4 }}>
+          <p style={{ fontSize: 13, color: "var(--apple-text-secondary)", margin: "6px 0 18px" }}>
             Create or activate a track from your dashboard to begin your daily focus session.
           </p>
+          <Link href="/dashboard?new=true" className="lime-btn-primary" style={{ display: "inline-flex" }}>
+            <span>Create Track</span>
+          </Link>
         </div>
       )}
     </div>

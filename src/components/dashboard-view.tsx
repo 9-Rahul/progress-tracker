@@ -29,7 +29,8 @@ import {
   Users,
   X,
   Command,
-  Trash2
+  Trash2,
+  HelpCircle
 } from "lucide-react";
 import { useProjectStore } from "@/hooks/use-project-store";
 import { addDays, formatDate, missedDays, oneYearFromToday, projectStatusLabel, streakCount, stripEmojis } from "@/lib/progress";
@@ -233,7 +234,13 @@ function ProjectCard({
                   </span>
                   <div
                     className={`track-week-box ${d.isToday ? "today" : ""} ${isLogged ? "logged" : ""}`}
-                    title={`${d.dateStr}${d.isToday ? " (Today)" : ""}`}
+                    title={
+                      isLogged
+                        ? `${d.dateStr}: Verified check-in recorded`
+                        : d.isToday
+                        ? `${d.dateStr} (Today: click "Check in" to log)`
+                        : `${d.dateStr} (Past day locked — check-ins are recorded day-of)`
+                    }
                   >
                     {isLogged && <Check size={12} strokeWidth={3} />}
                   </div>
@@ -741,11 +748,25 @@ export function DashboardView() {
   const [modalOpen, setModalOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
   const addButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     setMounted(true);
+    if (typeof window !== "undefined") {
+      const dismissed = localStorage.getItem("exectrack_welcome_dismissed");
+      if (!dismissed) {
+        setShowWelcome(true);
+      }
+    }
   }, []);
+
+  const dismissWelcome = () => {
+    setShowWelcome(false);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("exectrack_welcome_dismissed", "true");
+    }
+  };
 
   // Return focus to trigger button when modal closes
   useEffect(() => {
@@ -832,13 +853,36 @@ export function DashboardView() {
 
   return (
     <div className="overview-container">
+      {/* Welcome Micro-Banner for First-Time Viewers */}
+      {showWelcome && (
+        <div className="apple-welcome-banner">
+          <div className="apple-welcome-banner-left">
+            <span className="apple-brand-dot" />
+            <div>
+              <strong>Welcome to ExecTrack.</strong>
+              <span> Log your daily progress once every 24 hours. No backdating or fudged streaks—just verified execution.</span>
+            </div>
+          </div>
+          <button
+            type="button"
+            className="apple-welcome-banner-close"
+            onClick={dismissWelcome}
+            title="Dismiss welcome notice"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      )}
+
       {/* Editorial Header */}
       <div className="overview-header">
         <div>
           <div className="overview-date-eyebrow">{currentDateFormatted}</div>
           <h1 className="overview-title">Overview</h1>
           <p className="overview-subtitle">
-            {stats.active} active {stats.active === 1 ? "track" : "tracks"} · {stats.average}% average execution rate
+            {projects.length === 0
+              ? "Ready to begin · Create your first track to build your streak"
+              : `${stats.active} active ${stats.active === 1 ? "track" : "tracks"} · ${stats.average}% average execution rate`}
           </p>
         </div>
         <button
@@ -865,7 +909,14 @@ export function DashboardView() {
         {/* 2. CONSISTENCY */}
         <div className="metric-col">
           <div className="metric-col-header">
-            <span className="metric-col-label">CONSISTENCY</span>
+            <span
+              className="metric-col-label"
+              style={{ display: "inline-flex", alignItems: "center", gap: 5, cursor: "help" }}
+              title="Execution consistency: Reflects consecutive verified daily check-ins. Missed days decrease consistency."
+            >
+              <span>CONSISTENCY</span>
+              <HelpCircle size={11} color="#7e7e88" />
+            </span>
             <div className="metric-col-ring">
               <svg width="34" height="34" viewBox="0 0 34 34">
                 <circle cx="17" cy="17" r="13" fill="none" stroke="#25252b" strokeWidth="3" />
@@ -976,17 +1027,24 @@ export function DashboardView() {
           />
         ))}
 
-        {/* Add Another Track Card (matching user mockup) */}
+        {/* Add Another Track Card / First Track Card */}
         <button
           type="button"
           className="add-another-track-card"
           onClick={() => setModalOpen(true)}
-          title="Create a new track"
+          title={projects.length === 0 ? "Create your first track" : "Create a new track"}
         >
           <div className="add-another-track-icon">
             <Plus size={16} strokeWidth={2.5} />
           </div>
-          <span className="add-another-track-label">Add another track</span>
+          <span className="add-another-track-label">
+            {projects.length === 0 ? "Create your first track" : "Add another track"}
+          </span>
+          {projects.length === 0 && (
+            <span style={{ fontSize: 12, color: "#7e7e88", marginTop: 8, maxWidth: 220, textAlign: "center", lineHeight: 1.4 }}>
+              Set an ambitious 30-day target to start your daily streak
+            </span>
+          )}
         </button>
       </div>
 
