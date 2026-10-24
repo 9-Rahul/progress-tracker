@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { type ReactNode, useState, useEffect } from "react";
-import { Menu, Plus, X, Trash2, PanelLeftClose, PanelLeft } from "lucide-react";
+import { Menu, Plus, X, Trash2, PanelLeftClose, PanelLeft, LayoutDashboard, Target, BarChart3, FolderKanban } from "lucide-react";
 import { useAuth, useTheme } from "@/components/providers";
 import { useProjectStore } from "@/hooks/use-project-store";
 import { stripEmojis } from "@/lib/progress";
@@ -216,23 +216,50 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      {/* Mobile Top Header */}
-      <header className="top-header" style={{ borderBottom: "1px solid var(--apple-border)", backdropFilter: "blur(20px)" }}>
-        <Link className="top-header-brand" href="/dashboard" style={{ textDecoration: "none" }}>
-          <span className="apple-brand-dot" />
-          <span style={{ fontSize: 14, fontWeight: 700, color: "var(--apple-text-primary)" }}>ExecTrack</span>
-        </Link>
+      {/* Mobile & Tablet Top Header */}
+      <header className="top-header">
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <Link className="top-header-brand" href="/dashboard" style={{ textDecoration: "none" }}>
+            <span className="apple-brand-dot" />
+            <span style={{ fontSize: 14.5, fontWeight: 700, color: "var(--apple-text-primary)" }}>ExecTrack</span>
+          </Link>
 
-        <span style={{ fontSize: 13, fontWeight: 600, color: "var(--apple-text-primary)" }}>{getPageTitle(pathname)}</span>
+          {/* Tablet Nav Links (visible on tablet >= 641px) */}
+          <nav className="apple-tablet-nav" aria-label="Tablet navigation">
+            {navItems.map((item) => {
+              const active = isActive(pathname, item.href);
+              return (
+                <Link
+                  key={item.href}
+                  className={`apple-tablet-nav-link ${active ? "active" : ""}`}
+                  href={item.href}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
+        {/* Right Actions */}
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <Link
+            href="/dashboard?new=1"
+            className="apple-top-new-btn"
+            title="Create New Track"
+          >
+            <Plus size={14} strokeWidth={2.5} />
+            <span className="apple-hide-on-small">New Track</span>
+          </Link>
+
           <button
             className="apple-btn-secondary"
             type="button"
-            style={{ width: 32, height: 32, padding: 0 }}
-            aria-label="Open menu"
+            style={{ width: 32, height: 32, padding: 0, borderRadius: 8 }}
+            aria-label="Open menu and track list"
             aria-expanded={drawerOpen}
             onClick={() => setDrawerOpen(true)}
+            title="Tracks & Settings"
           >
             <Menu size={16} />
           </button>
@@ -250,26 +277,36 @@ export function AppShell({ children }: { children: ReactNode }) {
         {children}
       </motion.main>
 
-      {/* Mobile iOS-Style Bottom Tab Bar */}
+      {/* Mobile iOS-Style Bottom Tab Bar (Mobile ONLY <= 768px) */}
       <nav className="apple-bottom-tabbar" aria-label="Mobile navigation">
-        {navItems.map((item) => {
-          const active = isActive(pathname, item.href);
-          return (
-            <Link
-              key={item.href}
-              className={`apple-tab-item ${active ? "active" : ""}`}
-              href={item.href}
-            >
-              <span style={{ fontWeight: active ? 700 : 500 }}>{item.label}</span>
-            </Link>
-          );
-        })}
+        <Link
+          className={`apple-tab-item ${isActive(pathname, "/dashboard") ? "active" : ""}`}
+          href="/dashboard"
+        >
+          <LayoutDashboard size={18} strokeWidth={isActive(pathname, "/dashboard") ? 2.4 : 1.8} />
+          <span>Overview</span>
+        </Link>
+        <Link
+          className={`apple-tab-item ${isActive(pathname, "/focus") ? "active" : ""}`}
+          href="/focus"
+        >
+          <Target size={18} strokeWidth={isActive(pathname, "/focus") ? 2.4 : 1.8} />
+          <span>Focus</span>
+        </Link>
+        <Link
+          className={`apple-tab-item ${isActive(pathname, "/reports") ? "active" : ""}`}
+          href="/reports"
+        >
+          <BarChart3 size={18} strokeWidth={isActive(pathname, "/reports") ? 2.4 : 1.8} />
+          <span>Reports</span>
+        </Link>
         <button
           className="apple-tab-item"
           type="button"
           onClick={() => setDrawerOpen(true)}
-          aria-label="Tracks list"
+          aria-label="Tracks and settings drawer"
         >
+          <FolderKanban size={18} strokeWidth={1.8} />
           <span>Tracks</span>
         </button>
       </nav>
