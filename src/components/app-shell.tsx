@@ -11,7 +11,11 @@ import {
   Target,
   BarChart3,
   FolderKanban,
-  LogOut
+  LogOut,
+  ArrowUp,
+  ShieldCheck,
+  Zap,
+  Activity
 } from "lucide-react";
 import { useAuth } from "@/components/providers";
 import { useProjectStore } from "@/hooks/use-project-store";
@@ -129,7 +133,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             type="button"
             className={`apple-header-toggle-btn ${sidebarOpen ? "active" : ""}`}
             onClick={toggleSidebar}
-            title={sidebarOpen ? "Hide Workspace (⌘B)" : "Show Workspace (⌘B)"}
+            title={sidebarOpen ? "Hide Workspace" : "Show Workspace"}
             aria-label="Toggle Workspace"
             aria-expanded={sidebarOpen}
           >
@@ -271,7 +275,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           {children}
         </div>
 
-        {/* Apple Workspace Persistent Footer */}
+        {/* Apple Workspace Persistent Redesigned Footer */}
         <footer className="apple-workspace-footer">
           <div className="apple-workspace-footer-inner">
             {/* Brand & Status Column */}
@@ -284,30 +288,11 @@ export function AppShell({ children }: { children: ReactNode }) {
               <p className="apple-footer-tagline">
                 Track execution, not intention. Engineered for high-output builders.
               </p>
-              <div className="apple-footer-pulse-row">
+              <div className="apple-footer-status-pill">
                 <span className="apple-status-pulse-dot" />
                 <span className="apple-status-pulse-text">
-                  All systems operational · Local & Cloud sync active
+                  Systems Operational · Local Sync Active
                 </span>
-              </div>
-            </div>
-
-            {/* Keyboard Shortcuts Column */}
-            <div className="apple-footer-col shortcuts-col apple-hide-on-small">
-              <p className="apple-footer-col-title">KEYBOARD SHORTCUTS</p>
-              <div className="apple-footer-shortcuts-list">
-                <div className="apple-shortcut-item">
-                  <kbd className="apple-footer-kbd">⌘B</kbd>
-                  <span>Toggle Sidebar</span>
-                </div>
-                <div className="apple-shortcut-item">
-                  <kbd className="apple-footer-kbd">⌘K</kbd>
-                  <span>Quick Action</span>
-                </div>
-                <div className="apple-shortcut-item">
-                  <kbd className="apple-footer-kbd">Esc</kbd>
-                  <span>Dismiss Dialogs</span>
-                </div>
               </div>
             </div>
 
@@ -315,9 +300,15 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="apple-footer-col links-col">
               <p className="apple-footer-col-title">WORKSPACE</p>
               <div className="apple-footer-links-list">
-                <Link href="/dashboard" className="apple-footer-link">Overview</Link>
-                <Link href="/focus" className="apple-footer-link">Focus Mode</Link>
-                <Link href="/reports" className="apple-footer-link">Analytics</Link>
+                <Link href="/dashboard" className="apple-footer-link">
+                  Overview
+                </Link>
+                <Link href="/focus" className="apple-footer-link">
+                  Focus Mode
+                </Link>
+                <Link href="/reports" className="apple-footer-link">
+                  Analytics & Reports
+                </Link>
                 <button
                   type="button"
                   className="apple-footer-danger-link"
@@ -327,16 +318,79 @@ export function AppShell({ children }: { children: ReactNode }) {
                 </button>
               </div>
             </div>
+
+            {/* System Architecture Column (Replacing keyboard shortcuts) */}
+            <div className="apple-footer-col arch-col apple-hide-on-small">
+              <p className="apple-footer-col-title">ARCHITECTURE</p>
+              <div className="apple-footer-arch-list">
+                <div className="apple-footer-arch-item">
+                  <Zap size={13} className="apple-arch-icon" />
+                  <div className="apple-arch-text">
+                    <span className="apple-arch-label">High Velocity</span>
+                    <span className="apple-arch-desc">Streak anti-drift tracking</span>
+                  </div>
+                </div>
+                <div className="apple-footer-arch-item">
+                  <ShieldCheck size={13} className="apple-arch-icon" />
+                  <div className="apple-arch-text">
+                    <span className="apple-arch-label">Zero Telemetry</span>
+                    <span className="apple-arch-desc">Encrypted local persistence</span>
+                  </div>
+                </div>
+                <div className="apple-footer-arch-item">
+                  <Activity size={13} className="apple-arch-icon" />
+                  <div className="apple-arch-text">
+                    <span className="apple-arch-label">Active Flow</span>
+                    <span className="apple-arch-desc">Focused execution cycles</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Workspace Pulse & Quick Actions Column */}
+            <div className="apple-footer-col pulse-col">
+              <p className="apple-footer-col-title">WORKSPACE PULSE</p>
+              <div className="apple-pulse-card">
+                <div className="apple-pulse-item">
+                  <span className="apple-pulse-val">{projects.length}</span>
+                  <span className="apple-pulse-label">Tracks</span>
+                </div>
+                <div className="apple-pulse-divider" />
+                <div className="apple-pulse-item">
+                  <span className="apple-pulse-val">
+                    {projects.filter((p) => (p.progress > 0 && p.progress < 100) || p.status === "active").length}
+                  </span>
+                  <span className="apple-pulse-label">Active</span>
+                </div>
+                <div className="apple-pulse-divider" />
+                <div className="apple-pulse-item">
+                  <span className="apple-pulse-val">
+                    {projects.filter((p) => p.progress >= 100).length}
+                  </span>
+                  <span className="apple-pulse-label">Done</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                className="apple-footer-scroll-top"
+                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+                aria-label="Scroll back to top"
+              >
+                <ArrowUp size={12} strokeWidth={2.4} />
+                <span>Back to top</span>
+              </button>
+            </div>
           </div>
 
           {/* Bottom Copyright and Meta Tags */}
           <div className="apple-workspace-footer-bottom">
             <p className="apple-footer-copyright">
-              © {new Date().getFullYear()} ExecTrack. Continuous improvement through verified output.
+              © {new Date().getFullYear()} ExecTrack · Built for continuous output. Continuous verified execution.
             </p>
             <div className="apple-footer-meta-tags">
-              <span className="apple-meta-pill">Zero telemetry</span>
-              <span className="apple-meta-pill">Offline first</span>
+              <span className="apple-meta-pill">v2.4 Production</span>
+              <span className="apple-meta-pill">Zero Telemetry</span>
+              <span className="apple-meta-pill">Offline First</span>
             </div>
           </div>
         </footer>
