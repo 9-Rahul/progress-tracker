@@ -6,7 +6,6 @@ import { type ReactNode, useState, useEffect } from "react";
 import {
   Plus,
   Trash2,
-  PanelLeftClose,
   PanelLeft,
   LayoutDashboard,
   Target,
@@ -208,60 +207,24 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Single Fixed Apple macOS-Style Sidebar */}
-      <aside className="apple-sidebar" aria-label="Workspace sidebar">
-        {/* Sidebar Header with Close Toggle */}
+      {/* Single Fixed Apple macOS-Style Sidebar (Dedicated Tracks Explorer) */}
+      <aside className="apple-sidebar" aria-label="Tracks explorer">
+        {/* Sidebar Header with Track Count */}
         <div className="apple-sidebar-header">
-          <div className="apple-sidebar-brand-title">WORKSPACE</div>
-          <button
-            type="button"
-            className="apple-sidebar-toggle-btn"
-            onClick={toggleSidebar}
-            title="Close Sidebar (⌘B)"
-            aria-label="Close Sidebar"
-          >
-            <PanelLeftClose size={15} strokeWidth={2} />
-          </button>
-        </div>
-
-        {/* Quick New Track Action */}
-        <Link className="apple-new-btn" href="/dashboard?new=1" onClick={handleNavClick}>
-          <span>New Track</span>
-        </Link>
-
-        {/* Workspace Nav Links in Sidebar */}
-        <div className="apple-sidebar-nav-group">
-          <p className="apple-nav-group-title">NAVIGATION</p>
-          {navItems.map((item) => {
-            const active = isActive(pathname, item.href);
-            return (
-              <Link
-                key={item.href}
-                className={`apple-nav-link ${active ? "active" : ""}`}
-                href={item.href}
-                onClick={handleNavClick}
-              >
-                <span>{item.label}</span>
-              </Link>
-            );
-          })}
+          <span className="apple-sidebar-brand-title">ACTIVE TRACKS</span>
+          <span className="apple-count-pill">{projects.length}</span>
         </div>
 
         {/* Tracks List */}
-        <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column", marginTop: 8 }}>
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 10px", marginBottom: 6 }}>
-            <p className="apple-nav-group-title" style={{ margin: 0, padding: 0 }}>ACTIVE TRACKS</p>
-            <span className="apple-count-pill">{projects.length}</span>
-          </div>
-
+        <div style={{ flex: 1, minHeight: 0, display: "flex", flexDirection: "column" }}>
           <div style={{ flex: 1, overflowY: "auto", paddingRight: 2 }}>
             {loading ? (
               <div style={{ padding: "8px 10px", color: "var(--apple-text-tertiary)", fontSize: 12 }}>
                 Loading tracks…
               </div>
             ) : projects.length === 0 ? (
-              <div style={{ padding: "8px 10px", color: "var(--apple-text-tertiary)", fontSize: 12 }}>
-                No active tracks yet.
+              <div style={{ padding: "16px 10px", color: "var(--apple-text-tertiary)", fontSize: 12, lineHeight: 1.5 }}>
+                No active tracks yet. Use &quot;+ New Track&quot; in the header to start.
               </div>
             ) : (
               projects.map((project) => {
@@ -298,31 +261,17 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         {/* Minimalist Sidebar Footer */}
         <div className="apple-sidebar-footer">
-          <div className="apple-footer-user-row">
-            <span className="apple-user-email">
-              {user?.email || user?.name || "Builder"}
-            </span>
-          </div>
-          <div className="apple-footer-text-actions">
-            <button
-              type="button"
-              className="apple-footer-text-btn"
-              onClick={() => {
-                handleNavClick();
-                setResetConfirmOpen(true);
-              }}
-            >
-              Reset
-            </button>
-            <span className="apple-footer-divider">·</span>
-            <button
-              type="button"
-              className="apple-footer-text-btn"
-              onClick={handleSignOut}
-            >
-              Sign Out
-            </button>
-          </div>
+          <button
+            type="button"
+            className="apple-footer-text-btn"
+            style={{ width: "100%", textAlign: "center", padding: "4px 0", color: "var(--apple-text-tertiary)" }}
+            onClick={() => {
+              handleNavClick();
+              setResetConfirmOpen(true);
+            }}
+          >
+            Reset Progress
+          </button>
         </div>
       </aside>
 
