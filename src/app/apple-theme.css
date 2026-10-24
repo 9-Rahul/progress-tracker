@@ -669,6 +669,12 @@ body {
   border-color: var(--apple-border-strong) !important;
 }
 
+.apple-header-toggle-btn.active {
+  background: var(--apple-active) !important;
+  color: var(--apple-lime) !important;
+  border-color: rgba(187, 244, 61, 0.4) !important;
+}
+
 .top-header-brand {
   display: inline-flex !important;
   align-items: center !important;

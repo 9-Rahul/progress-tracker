@@ -50,22 +50,14 @@ export function AppShell({ children }: { children: ReactNode }) {
       return isSmall;
     };
 
-    const isSmall = checkScreen();
-    if (!isSmall) {
-      try {
-        const saved = localStorage.getItem("exectrack_sidebar_collapsed");
-        if (saved !== null) {
-          // If explicitly saved as "false", user deliberately opened it
-          setSidebarOpen(saved === "false");
-        } else {
-          // Hide by default
-          setSidebarOpen(false);
-        }
-      } catch {
-        setSidebarOpen(false);
-      }
-    } else {
-      setSidebarOpen(false);
+    checkScreen();
+    // Default workspace should be toggled off
+    setSidebarOpen(false);
+
+    try {
+      localStorage.removeItem("exectrack_sidebar_collapsed");
+    } catch {
+      // ignore
     }
 
     const handleResize = () => {
@@ -78,17 +70,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   }, []);
 
   const toggleSidebar = () => {
-    setSidebarOpen((prev) => {
-      const next = !prev;
-      if (!isMobileOrTablet) {
-        try {
-          localStorage.setItem("exectrack_sidebar_collapsed", String(!next));
-        } catch {
-          // ignore
-        }
-      }
-      return next;
-    });
+    setSidebarOpen((prev) => !prev);
   };
 
   useEffect(() => {
@@ -100,7 +82,7 @@ export function AppShell({ children }: { children: ReactNode }) {
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [isMobileOrTablet]);
+  }, []);
 
   const handleNavClick = () => {
     if (isMobileOrTablet) {
@@ -145,10 +127,10 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="top-header-left">
           <button
             type="button"
-            className="apple-header-toggle-btn"
+            className={`apple-header-toggle-btn ${sidebarOpen ? "active" : ""}`}
             onClick={toggleSidebar}
-            title={sidebarOpen ? "Collapse Sidebar (⌘B)" : "Expand Sidebar (⌘B)"}
-            aria-label="Toggle Sidebar"
+            title={sidebarOpen ? "Hide Workspace (⌘B)" : "Show Workspace (⌘B)"}
+            aria-label="Toggle Workspace"
             aria-expanded={sidebarOpen}
           >
             <PanelLeft size={16} strokeWidth={2} />
@@ -176,16 +158,18 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
         </div>
 
-        {/* Right: + New Track, User Badge, Sign Out */}
+        {/* Right: + New Track (rendered on subpages; on /dashboard the page hero button handles it), User Badge, Sign Out */}
         <div className="top-header-right">
-          <Link
-            href="/dashboard?new=1"
-            className="apple-top-new-btn"
-            title="Create New Track"
-          >
-            <Plus size={14} strokeWidth={2.5} />
-            <span className="apple-hide-on-small">New Track</span>
-          </Link>
+          {pathname !== "/dashboard" && (
+            <Link
+              href="/dashboard?new=1"
+              className="apple-top-new-btn"
+              title="Create New Track"
+            >
+              <Plus size={14} strokeWidth={2.5} />
+              <span className="apple-hide-on-small">New Track</span>
+            </Link>
+          )}
 
           <div className="apple-header-user-badge" title={user?.email || "Builder"}>
             <span className="apple-header-avatar">{userInitials}</span>
@@ -224,7 +208,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             ) : projects.length === 0 ? (
               <div style={{ padding: "16px 10px", color: "var(--apple-text-tertiary)", fontSize: 12, lineHeight: 1.5 }}>
-                No active tracks yet. Use &quot;+ New Track&quot; in the header to start.
+                No active tracks yet. Use &quot;New Track&quot; to begin.
               </div>
             ) : (
               projects.map((project) => {
