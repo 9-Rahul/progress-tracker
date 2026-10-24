@@ -121,7 +121,6 @@ export function AppShell({ children }: { children: ReactNode }) {
         {/* Quick New Track Action */}
         <Link className="apple-new-btn" href="/dashboard?new=1">
           <span>New Track</span>
-          <span className="apple-new-btn-kbd">⌘K</span>
         </Link>
 
         {/* Primary Navigation (Pure Typography, NO ICONS) */}
