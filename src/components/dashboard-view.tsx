@@ -1028,25 +1028,25 @@ export function DashboardView() {
           />
         ))}
 
-        {/* Add Another Track Card / First Track Card */}
-        <button
-          type="button"
-          className="add-another-track-card"
-          onClick={() => setModalOpen(true)}
-          title={projects.length === 0 ? "Create your first track" : "Create a new track"}
-        >
-          <div className="add-another-track-icon">
-            <Plus size={16} strokeWidth={2.5} />
-          </div>
-          <span className="add-another-track-label">
-            {projects.length === 0 ? "Create your first track" : "Add another track"}
-          </span>
-          {projects.length === 0 && (
+        {/* First Track Onboarding Card - shown only when there are no active tracks */}
+        {projects.length === 0 && (
+          <button
+            type="button"
+            className="add-another-track-card"
+            onClick={() => setModalOpen(true)}
+            title="Create your first track"
+          >
+            <div className="add-another-track-icon">
+              <Plus size={16} strokeWidth={2.5} />
+            </div>
+            <span className="add-another-track-label">
+              Create your first track
+            </span>
             <span style={{ fontSize: 12, color: "#7e7e88", marginTop: 8, maxWidth: 220, textAlign: "center", lineHeight: 1.4 }}>
               Set an ambitious 30-day target to start your daily streak
             </span>
-          )}
-        </button>
+          </button>
+        )}
       </div>
 
       {modalOpen && (
