@@ -351,7 +351,7 @@ function CreateProjectModal({
             transition={{ type: "spring", damping: 28, stiffness: 360 }}
             style={{
               maxWidth: 480,
-              width: "92%",
+              width: "min(94%, 480px)",
               padding: 0,
               borderRadius: 20,
               overflow: "hidden",
@@ -366,7 +366,7 @@ function CreateProjectModal({
                 display: "flex",
                 alignItems: "flex-start",
                 justifyContent: "space-between",
-                padding: "20px 22px 16px",
+                padding: "18px 18px 14px",
                 borderBottom: "1px solid var(--apple-border)"
               }}
             >
@@ -416,7 +416,7 @@ function CreateProjectModal({
             </div>
 
             {/* Modal Form */}
-            <form onSubmit={submit} style={{ padding: "20px 22px 22px" }}>
+            <form onSubmit={submit} style={{ padding: "18px 18px 20px" }}>
               {/* Title input */}
               <div style={{ marginBottom: 18 }}>
                 <label
@@ -548,9 +548,10 @@ function CreateProjectModal({
                         onClick={() => handlePresetChange(item.id as any)}
                         style={{
                           height: 30,
+                          padding: "0 2px",
                           borderRadius: 7,
                           border: "none",
-                          fontSize: 12,
+                          fontSize: 11.5,
                           fontWeight: active ? 600 : 500,
                           background: active ? "var(--apple-segment-active)" : "transparent",
                           color: active ? "var(--apple-text-primary)" : "var(--apple-text-tertiary)",

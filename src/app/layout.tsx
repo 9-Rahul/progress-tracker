@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import type { ReactNode } from "react";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { Providers } from "@/components/providers";
@@ -17,6 +17,14 @@ const jetbrainsMono = JetBrains_Mono({
   variable: "--font-mono",
   display: "swap",
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  viewportFit: "cover",
+  themeColor: "#0a0a0c"
+};
 
 export const metadata: Metadata = {
   title: "ExecTrack — Track execution, not intention.",

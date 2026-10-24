@@ -506,7 +506,7 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
       </div>
 
       {/* Analytics & History Section */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 20 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: 20 }}>
         {/* Weekly Trend */}
         <section className="apple-card">
           <div className="apple-card-inner">

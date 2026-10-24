@@ -73,7 +73,7 @@ export default function PublicSharePage() {
   return (
     <div style={{ minHeight: "100vh", background: "var(--apple-bg)", color: "var(--apple-text-primary)", fontFamily: "var(--apple-font)", paddingBottom: 60 }}>
       {/* Top Navbar */}
-      <header style={{ borderBottom: "1px solid var(--apple-border)", backdropFilter: "blur(20px)", padding: "14px 24px" }}>
+      <header style={{ borderBottom: "1px solid var(--apple-border)", backdropFilter: "blur(20px)", padding: "14px 16px" }}>
         <div style={{ maxWidth: 1040, margin: "0 auto", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <Link href="/" style={{ display: "flex", alignItems: "center", gap: 8, textDecoration: "none", color: "inherit" }}>
             <span
@@ -101,32 +101,32 @@ export default function PublicSharePage() {
       </header>
 
       {/* Main Content */}
-      <main style={{ maxWidth: 1040, margin: "32px auto 0", padding: "0 20px" }}>
+      <main style={{ maxWidth: 1040, margin: "24px auto 0", padding: "0 14px" }}>
         {/* Apple Achievement Card Hero */}
         <section
           className="apple-card"
           style={{
             marginBottom: 24,
-            padding: "clamp(24px, 4vw, 40px)",
+            padding: "clamp(20px, 4vw, 36px)",
             background: "var(--apple-card)"
           }}
         >
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 24 }}>
-            <div style={{ flex: 1, minWidth: 280 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: 20 }}>
+            <div style={{ flex: 1, minWidth: "min(100%, 250px)" }}>
               <div style={{ display: "inline-flex", alignItems: "center", gap: 6, fontSize: 12, fontWeight: 600, color: "var(--apple-orange)", background: "rgba(255, 159, 10, 0.1)", padding: "4px 10px", borderRadius: 8, marginBottom: 16 }}>
                 <Flame size={14} fill="currentColor" />
                 <span>{streak} DAY STREAK</span>
               </div>
 
-              <h1 style={{ fontSize: "clamp(2rem, 4vw, 2.75rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 10px", color: "var(--apple-text-primary)", lineHeight: 1.15 }}>
+              <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.75rem)", fontWeight: 800, letterSpacing: "-0.03em", margin: "0 0 10px", color: "var(--apple-text-primary)", lineHeight: 1.15 }}>
                 {project.title}
               </h1>
 
-              <p style={{ fontSize: 15, color: "var(--apple-text-secondary)", lineHeight: 1.6, maxWidth: 560, margin: "0 0 20px" }}>
+              <p style={{ fontSize: 14, color: "var(--apple-text-secondary)", lineHeight: 1.6, maxWidth: 560, margin: "0 0 20px" }}>
                 {project.description || "Daily execution track verified with server-enforced 24-hour cadence and immutable check-ins."}
               </p>
 
-              <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "var(--apple-text-tertiary)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: 14, fontSize: 12.5, color: "var(--apple-text-tertiary)", flexWrap: "wrap" }}>
                 <span>Target: {project.deadline?.startsWith("2099") ? "Continuous" : formatDate(project.deadline)}</span>
                 <span>·</span>
                 <span>{project.logs?.length || 0} Total Check-ins</span>
@@ -134,7 +134,7 @@ export default function PublicSharePage() {
             </div>
 
             {/* Execution Score Ring */}
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "18px 24px", background: "var(--apple-inset)", borderRadius: 20, border: "1px solid var(--apple-border)" }}>
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", padding: "18px 24px", background: "var(--apple-inset)", borderRadius: 20, border: "1px solid var(--apple-border)", margin: "0 auto" }}>
               <ProgressRing value={project.progress || 0} size={116} stroke={8} color="#bbf43d" label="SCORE" />
             </div>
           </div>
@@ -197,7 +197,7 @@ export default function PublicSharePage() {
         <section
           className="apple-card"
           style={{
-            padding: "24px 32px",
+            padding: "20px 18px",
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
