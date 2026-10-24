@@ -877,7 +877,7 @@ export function DashboardView() {
 
       {/* Editorial Header */}
       <div className="overview-header">
-        <div>
+        <div className="overview-header-text">
           <div className="overview-date-eyebrow">{currentDateFormatted}</div>
           <h1 className="overview-title">Overview</h1>
           <p className="overview-subtitle">

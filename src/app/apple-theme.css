@@ -100,6 +100,21 @@ body {
   margin-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 640px) {
+  .apple-header {
+    margin-bottom: 16px !important;
+    gap: 10px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+  }
+  .apple-header > div:first-child {
+    min-width: 0 !important;
+    flex: 1 1 auto !important;
+  }
 }
 
 .apple-header-title {
@@ -642,7 +657,11 @@ body {
 
   .app-shell .main {
     width: 100% !important;
-    max-width: 100% !important;
+    max-width: 100vw !important;
+    min-width: 0 !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+    padding-top: 52px !important;
   }
 }
 
@@ -654,18 +673,19 @@ body {
 @media (max-width: 1024px) {
   .top-header {
     display: flex !important;
-    position: sticky !important;
+    position: fixed !important;
     top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     width: 100% !important;
-    height: 54px !important;
+    max-width: 100vw !important;
+    height: 52px !important;
     padding: 0 16px !important;
-    background: rgba(10, 10, 12, 0.92) !important;
+    background: rgba(10, 10, 12, 0.94) !important;
     backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
     border-bottom: 1px solid var(--apple-border) !important;
-    z-index: 40 !important;
+    z-index: 60 !important;
     align-items: center !important;
     justify-content: space-between !important;
     box-sizing: border-box !important;
@@ -1430,22 +1450,40 @@ body {
 @media (max-width: 640px) {
   .overview-container {
     padding: 16px 14px calc(60px + env(safe-area-inset-bottom, 0px) + 50px) !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    box-sizing: border-box !important;
+    min-width: 0 !important;
   }
   .overview-header {
     margin-bottom: 16px !important;
-    gap: 12px !important;
+    gap: 10px !important;
     align-items: flex-start !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+  .overview-header > div:first-child {
+    flex: 1 1 auto !important;
+    min-width: 0 !important;
   }
   .overview-title {
-    font-size: 26px !important;
+    font-size: 24px !important;
     letter-spacing: -0.02em !important;
+    margin: 0 0 4px 0 !important;
   }
   .overview-subtitle {
-    font-size: 12px !important;
+    font-size: 11.5px !important;
+    line-height: 1.35 !important;
+    word-break: break-word !important;
   }
   .lime-btn-primary {
-    padding: 8px 14px !important;
-    font-size: 12.5px !important;
+    padding: 7px 12px !important;
+    font-size: 12px !important;
+    height: 32px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+    border-radius: 9px !important;
   }
 }
 
@@ -1463,6 +1501,13 @@ body {
   margin-bottom: 24px;
   gap: 16px;
   flex-wrap: wrap;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.overview-header-text {
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .overview-date-eyebrow {
@@ -1645,6 +1690,8 @@ body {
   margin-bottom: 24px;
   flex-wrap: wrap;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .filter-pill-group {
@@ -1654,6 +1701,25 @@ body {
   border-radius: 12px;
   padding: 4px;
   gap: 4px;
+  max-width: 100%;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.filter-pill-group::-webkit-scrollbar {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .filter-sort-bar {
+    gap: 10px !important;
+    margin-bottom: 16px !important;
+  }
+  .filter-pill-btn {
+    padding: 5px 10px !important;
+    font-size: 12px !important;
+  }
 }
 
 .filter-pill-btn {
