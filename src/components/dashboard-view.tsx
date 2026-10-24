@@ -28,7 +28,6 @@ import {
   TriangleAlert,
   Users,
   X,
-  Command,
   Trash2,
   HelpCircle
 } from "lucide-react";
@@ -891,7 +890,7 @@ export function DashboardView() {
           className="lime-btn-primary"
           type="button"
           onClick={() => setModalOpen(true)}
-          title="New Track (⌘K)"
+          title="New Track"
         >
           <Plus size={16} strokeWidth={2.5} />
           <span>New Track</span>
