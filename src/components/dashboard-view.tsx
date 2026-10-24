@@ -857,7 +857,6 @@ export function DashboardView() {
       {showWelcome && (
         <div className="apple-welcome-banner">
           <div className="apple-welcome-banner-left">
-            <span className="apple-brand-dot" />
             <div>
               <strong>Welcome to ExecTrack.</strong>
               <span> Log your daily progress once every 24 hours. No backdating or fudged streaks—just verified execution.</span>

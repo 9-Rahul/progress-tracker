@@ -2290,7 +2290,6 @@ a:active {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  box-shadow: 0 0 6px 2px currentColor;
   background: #fff;
 }
 
@@ -3648,7 +3647,6 @@ a:active {
   height: 6px;
   background: var(--share-green);
   border-radius: 50%;
-  box-shadow: 0 0 8px var(--share-green);
 }
 
 .share-status .status-text {
@@ -3772,7 +3770,6 @@ a:active {
 .cal-dot.active {
   background: var(--share-green) !important;
   border-color: var(--share-green) !important;
-  box-shadow: 0 0 8px rgba(35, 134, 54, 0.4);
 }
 
 .quote {
@@ -3988,7 +3985,6 @@ a:active {
 
 .dot.fill {
   background: var(--share-green);
-  box-shadow: 0 0 6px rgba(35, 134, 54, 0.4);
 }
 
 /* Global Footer Banner */

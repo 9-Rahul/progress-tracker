@@ -366,7 +366,6 @@ export function ProjectDetailView({ projectId }: { projectId: string }) {
             />
             <div className="apple-score-card-meta">
               <span className={`apple-score-pill ${project.progress >= 100 ? "completed" : ""}`}>
-                <span className="apple-brand-dot" style={{ width: 6, height: 6 }} />
                 <span>{project.progress >= 100 ? "Completed" : "In Progress"}</span>
               </span>
               <span className="apple-metric-sub" style={{ marginTop: 8 }}>

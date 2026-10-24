@@ -73,7 +73,6 @@ export function AuthCard() {
         {/* Left Side: Product Identity & Live Track Preview */}
         <section className="apple-auth-hero">
           <div className="apple-auth-brand">
-            <span className="apple-brand-dot" />
             <span className="apple-auth-brand-name">ExecTrack</span>
           </div>
 

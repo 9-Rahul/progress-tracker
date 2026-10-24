@@ -691,12 +691,7 @@ body {
 }
 
 .apple-brand-dot {
-  width: 8px !important;
-  height: 8px !important;
-  border-radius: 50% !important;
-  background: var(--apple-green) !important;
-  box-shadow: 0 0 6px rgba(48, 209, 88, 0.4) !important;
-  flex-shrink: 0 !important;
+  display: none !important;
 }
 
 .apple-header-nav {
@@ -968,330 +963,167 @@ body {
    APPLE WORKSPACE FOOTER
    ============================================================ */
 /* ============================================================
-   APPLE WORKSPACE FOOTER (REDESIGNED)
+   MINIMAL APPLE WORKSPACE FOOTER
    ============================================================ */
-.apple-workspace-footer {
+.apple-workspace-footer.apple-footer-minimal {
   flex-shrink: 0 !important;
   width: 100% !important;
   border-top: 1px solid var(--apple-border) !important;
-  background: linear-gradient(180deg, rgba(14, 14, 17, 0.72) 0%, rgba(10, 10, 13, 0.96) 100%) !important;
+  background: linear-gradient(180deg, rgba(14, 14, 18, 0.65) 0%, rgba(10, 10, 13, 0.94) 100%) !important;
   backdrop-filter: blur(20px) !important;
   -webkit-backdrop-filter: blur(20px) !important;
-  padding: 40px 32px 32px !important;
+  padding: 18px 32px !important;
   box-sizing: border-box !important;
   margin-top: auto !important;
   position: relative !important;
 }
 
-.apple-workspace-footer::before {
+.apple-workspace-footer.apple-footer-minimal::before {
   content: "" !important;
   position: absolute !important;
   top: -1px !important;
-  left: 10% !important;
-  right: 10% !important;
+  left: 20% !important;
+  right: 20% !important;
   height: 1px !important;
-  background: linear-gradient(90deg, transparent, rgba(212, 255, 0, 0.22), rgba(255, 255, 255, 0.12), transparent) !important;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.08), transparent) !important;
   pointer-events: none !important;
 }
 
 @media (max-width: 640px) {
-  .apple-workspace-footer {
-    padding: 28px 18px calc(84px + env(safe-area-inset-bottom, 0px) + 20px) !important;
+  .apple-workspace-footer.apple-footer-minimal {
+    padding: 16px 18px calc(76px + env(safe-area-inset-bottom, 0px)) !important;
   }
 }
 
-.apple-workspace-footer-inner {
+.apple-footer-minimal-inner {
   max-width: 1200px !important;
   margin: 0 auto !important;
-  display: grid !important;
-  grid-template-columns: 2.2fr 1fr 1.6fr 1.3fr !important;
-  gap: 36px !important;
-  box-sizing: border-box !important;
-}
-
-@media (max-width: 1024px) {
-  .apple-workspace-footer-inner {
-    grid-template-columns: 1.4fr 1fr !important;
-    gap: 32px 24px !important;
-  }
-}
-
-@media (max-width: 640px) {
-  .apple-workspace-footer-inner {
-    grid-template-columns: 1fr !important;
-    gap: 26px !important;
-  }
-}
-
-.apple-footer-col {
-  display: flex !important;
-  flex-direction: column !important;
-}
-
-.apple-footer-brand-row {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  margin-bottom: 10px !important;
-}
-
-.apple-footer-brand-name {
-  font-size: 15px !important;
-  font-weight: 700 !important;
-  letter-spacing: -0.02em !important;
-  color: var(--apple-text-primary) !important;
-}
-
-.apple-footer-ver-badge {
-  font-size: 10px !important;
-  font-weight: 600 !important;
-  padding: 2px 7px !important;
-  border-radius: 4px !important;
-  background: var(--apple-inset) !important;
-  border: 1px solid var(--apple-border) !important;
-  color: var(--apple-text-tertiary) !important;
-}
-
-.apple-footer-tagline {
-  font-size: 12.5px !important;
-  color: var(--apple-text-secondary) !important;
-  line-height: 1.55 !important;
-  margin: 0 0 16px 0 !important;
-  max-width: 380px !important;
-}
-
-.apple-footer-status-pill {
-  display: inline-flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  padding: 6px 12px !important;
-  border-radius: 999px !important;
-  background: rgba(255, 255, 255, 0.03) !important;
-  border: 1px solid var(--apple-border) !important;
-  width: fit-content !important;
-  transition: border-color 150ms ease, background 150ms ease !important;
-}
-
-.apple-footer-status-pill:hover {
-  background: rgba(255, 255, 255, 0.05) !important;
-  border-color: var(--apple-border-strong) !important;
-}
-
-.apple-status-pulse-dot {
-  width: 7px !important;
-  height: 7px !important;
-  border-radius: 50% !important;
-  background: var(--apple-green) !important;
-  box-shadow: 0 0 8px rgba(48, 209, 88, 0.6) !important;
-  animation: applePulse 2.4s infinite ease-in-out !important;
-  flex-shrink: 0 !important;
-}
-
-.apple-status-pulse-text {
-  font-size: 11.5px !important;
-  font-weight: 500 !important;
-  color: var(--apple-text-secondary) !important;
-  letter-spacing: -0.01em !important;
-}
-
-@keyframes applePulse {
-  0%, 100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-  50% {
-    opacity: 0.55;
-    transform: scale(0.85);
-  }
-}
-
-.apple-footer-col-title {
-  font-size: 10.5px !important;
-  font-weight: 700 !important;
-  letter-spacing: 0.08em !important;
-  color: var(--apple-text-tertiary) !important;
-  margin: 0 0 14px 0 !important;
-  text-transform: uppercase !important;
-}
-
-.apple-footer-links-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 10px !important;
-}
-
-.apple-footer-link {
-  font-size: 13px !important;
-  color: var(--apple-text-secondary) !important;
-  text-decoration: none !important;
-  transition: color 120ms ease, transform 120ms ease !important;
-  display: inline-flex !important;
-  align-items: center !important;
-}
-
-.apple-footer-link:hover {
-  color: var(--apple-text-primary) !important;
-  transform: translateX(2px) !important;
-}
-
-.apple-footer-danger-link {
-  background: transparent !important;
-  border: none !important;
-  padding: 0 !important;
-  text-align: left !important;
-  font-size: 12.5px !important;
-  color: var(--apple-red) !important;
-  cursor: pointer !important;
-  opacity: 0.8 !important;
-  transition: opacity 120ms ease, transform 120ms ease !important;
-}
-
-.apple-footer-danger-link:hover {
-  opacity: 1 !important;
-  transform: translateX(2px) !important;
-}
-
-/* Architecture Features List */
-.apple-footer-arch-list {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 12px !important;
-}
-
-.apple-footer-arch-item {
-  display: flex !important;
-  align-items: flex-start !important;
-  gap: 10px !important;
-}
-
-.apple-arch-icon {
-  color: var(--apple-accent, #d4ff00) !important;
-  margin-top: 2px !important;
-  flex-shrink: 0 !important;
-}
-
-.apple-arch-text {
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 1px !important;
-}
-
-.apple-arch-label {
-  font-size: 12px !important;
-  font-weight: 600 !important;
-  color: var(--apple-text-primary) !important;
-}
-
-.apple-arch-desc {
-  font-size: 11px !important;
-  color: var(--apple-text-tertiary) !important;
-  line-height: 1.35 !important;
-}
-
-/* Workspace Pulse Card */
-.apple-pulse-card {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
-  background: var(--apple-card) !important;
-  border: 1px solid var(--apple-border) !important;
-  border-radius: 8px !important;
-  padding: 12px 14px !important;
-  margin-bottom: 12px !important;
+  gap: 20px !important;
+  flex-wrap: wrap !important;
+  box-sizing: border-box !important;
 }
 
-.apple-pulse-item {
+@media (max-width: 640px) {
+  .apple-footer-minimal-inner {
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    gap: 12px !important;
+  }
+}
+
+/* Left Brand, Status & Year */
+.apple-footer-min-left {
   display: flex !important;
-  flex-direction: column !important;
   align-items: center !important;
-  text-align: center !important;
-  flex: 1 !important;
+  gap: 10px !important;
+  font-size: 12px !important;
+  color: var(--apple-text-secondary) !important;
+  flex-wrap: wrap !important;
 }
 
-.apple-pulse-val {
-  font-size: 16px !important;
-  font-weight: 700 !important;
-  font-family: var(--font-mono, monospace) !important;
+.apple-footer-min-brand {
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  text-decoration: none !important;
   color: var(--apple-text-primary) !important;
-  line-height: 1.1 !important;
+  font-weight: 600 !important;
+  font-size: 13px !important;
+  letter-spacing: -0.01em !important;
+  transition: opacity 120ms ease !important;
 }
 
-.apple-pulse-label {
-  font-size: 10px !important;
-  font-weight: 500 !important;
+.apple-footer-min-brand:hover {
+  opacity: 0.85 !important;
+}
+
+.apple-footer-min-bullet {
   color: var(--apple-text-tertiary) !important;
-  margin-top: 3px !important;
-  letter-spacing: 0.02em !important;
+  opacity: 0.45 !important;
+  user-select: none !important;
 }
 
-.apple-pulse-divider {
-  width: 1px !important;
-  height: 24px !important;
-  background: var(--apple-border) !important;
-  margin: 0 4px !important;
+
+
+.apple-footer-min-copy {
+  font-size: 11.5px !important;
+  color: var(--apple-text-tertiary) !important;
 }
 
-/* Back to Top Button */
-.apple-footer-scroll-top {
+/* Right Navigation & Scroll to Top */
+.apple-footer-min-right {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+  margin-left: auto !important;
+}
+
+@media (max-width: 640px) {
+  .apple-footer-min-right {
+    margin-left: 0 !important;
+    width: 100% !important;
+    justify-content: space-between !important;
+  }
+}
+
+.apple-footer-min-nav {
+  display: flex !important;
+  align-items: center !important;
+  gap: 16px !important;
+}
+
+.apple-footer-min-link {
+  font-size: 12px !important;
+  color: var(--apple-text-secondary) !important;
+  text-decoration: none !important;
+  transition: color 120ms ease !important;
+  font-weight: 500 !important;
+}
+
+.apple-footer-min-link:hover {
+  color: var(--apple-text-primary) !important;
+}
+
+.apple-footer-min-danger {
+  background: transparent !important;
+  border: none !important;
+  padding: 0 !important;
+  font-size: 12px !important;
+  color: var(--apple-red) !important;
+  cursor: pointer !important;
+  opacity: 0.8 !important;
+  font-weight: 500 !important;
+  transition: opacity 120ms ease !important;
+}
+
+.apple-footer-min-danger:hover {
+  opacity: 1 !important;
+  text-decoration: underline !important;
+}
+
+.apple-footer-min-top {
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  gap: 6px !important;
+  width: 26px !important;
+  height: 26px !important;
+  border-radius: 6px !important;
   background: transparent !important;
   border: 1px solid var(--apple-border) !important;
-  border-radius: 6px !important;
   color: var(--apple-text-secondary) !important;
-  font-size: 11.5px !important;
-  font-weight: 500 !important;
-  padding: 7px 12px !important;
   cursor: pointer !important;
-  transition: all 140ms ease !important;
-  width: 100% !important;
+  transition: all 130ms ease !important;
+  flex-shrink: 0 !important;
 }
 
-.apple-footer-scroll-top:hover {
+.apple-footer-min-top:hover {
   background: var(--apple-hover) !important;
   color: var(--apple-text-primary) !important;
   border-color: var(--apple-border-strong) !important;
   transform: translateY(-1px) !important;
-}
-
-/* Bottom Bar */
-.apple-workspace-footer-bottom {
-  max-width: 1200px !important;
-  margin: 32px auto 0 !important;
-  padding-top: 22px !important;
-  border-top: 1px solid rgba(255, 255, 255, 0.06) !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 16px !important;
-  flex-wrap: wrap !important;
-}
-
-.apple-footer-copyright {
-  font-size: 11.5px !important;
-  color: var(--apple-text-tertiary) !important;
-  margin: 0 !important;
-  line-height: 1.5 !important;
-}
-
-.apple-footer-meta-tags {
-  display: flex !important;
-  align-items: center !important;
-  gap: 8px !important;
-  flex-wrap: wrap !important;
-}
-
-.apple-meta-pill {
-  font-size: 10.5px !important;
-  font-weight: 500 !important;
-  color: var(--apple-text-tertiary) !important;
-  background: var(--apple-card) !important;
-  border: 1px solid var(--apple-border) !important;
-  padding: 3px 9px !important;
-  border-radius: 999px !important;
-  letter-spacing: 0.01em !important;
 }
 
 /* ============================================================
